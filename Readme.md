@@ -1,7 +1,7 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
 * Студент: [Ольга Ушакова](https://up.htmlacademy.ru/ecmascript/8/user/809831).
-* Наставник: `Неизвестно`.
+* Наставник: [Дмитрий Рябинин](https://up.htmlacademy.ru/ecmascript/8/user/63289).
 
 ---
 
