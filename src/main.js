@@ -23,23 +23,14 @@ const renderPoints = (count) => {
 };
 
 const filtersData = [
-  {name: `Everything`, count: 0},
-  {name: `Future`, count: 0},
-  {name: `Past`, count: 0},
+  {id: `everything`, name: `Everything`, count: getRandom(maxPoints), checked: true},
+  {id: `future`, name: `Future`, count: getRandom(maxPoints)},
+  {id: `past`, name: `Past`, count: getRandom(maxPoints)}
 ];
 
-const createCountfiltersData = (data) => {
-  data.forEach((filter) => {
-    filter.count = getRandom(maxPoints);
-  });
-};
-
-createCountfiltersData(filtersData);
-
 const renderFilter = (data) => {
-  const id = data.name.toLocaleLowerCase();
-
-  const fragment = renderTemplate(makeFilter(id, data.name));
+  const checked = data.checked ? `checked` : ``;
+  const fragment = renderTemplate(makeFilter(data, checked));
   const input = fragment.querySelector(`input`);
   input.addEventListener(`change`, () => renderPoints(data.count));
   return fragment;
