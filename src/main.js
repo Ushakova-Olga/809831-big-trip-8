@@ -29,8 +29,7 @@ const filtersData = [
 ];
 
 const renderFilter = (data) => {
-  const checked = data.checked ? `checked` : ``;
-  const fragment = renderTemplate(makeFilter(data, checked));
+  const fragment = renderTemplate(makeFilter(data));
   const input = fragment.querySelector(`input`);
   input.addEventListener(`change`, () => renderPoints(data.count));
   return fragment;
