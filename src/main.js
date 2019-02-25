@@ -24,8 +24,8 @@ const renderPoints = (count) => {
 
 const filtersData = [
   {id: `everything`, name: `Everything`, count: getRandom(maxPoints), checked: true},
-  {id: `future`, name: `Future`, count: getRandom(maxPoints)},
-  {id: `past`, name: `Past`, count: getRandom(maxPoints)}
+  {id: `future`, name: `Future`, count: getRandom(maxPoints), checked: false},
+  {id: `past`, name: `Past`, count: getRandom(maxPoints), checked: false}
 ];
 
 const renderFilter = (data) => {
