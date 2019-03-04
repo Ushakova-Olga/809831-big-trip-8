@@ -1,5 +1,6 @@
 import makeFilter from './make-filter.js';
 import makePoint from './make-point.js';
+import makeData from './data.js';
 
 const tripFilterForm = document.querySelector(`.trip-filter`);
 const tripDayElement = document.querySelector(`.trip-day__items`);
@@ -15,8 +16,11 @@ const renderTemplate = (template = ``) => {
 
 const renderPoints = (count) => {
   const fragment = document.createDocumentFragment();
+  let points = new Array(count);
+
   for (let i = 0; i < count; i++) {
-    fragment.appendChild(renderTemplate(makePoint()));
+    points[i] = makeData();
+    fragment.appendChild(renderTemplate(makePoint(points[i])));
   }
   tripDayElement.innerHTML = ``;
   tripDayElement.appendChild(fragment);
