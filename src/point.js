@@ -1,4 +1,4 @@
-import {renderOffers, createElement} from './common.js';
+import {createElement} from './common.js';
 
 export default class Point {
   constructor(data) {
@@ -33,6 +33,14 @@ export default class Point {
     this._onOpen = fn;
   }
 
+  renderOffers() {
+    return [...this._offers].map((it) => `
+    <li>
+      <button class="trip-point__offer">${it.name}+&euro;&nbsp;${it.cost}</button>
+    </li>
+    `).join(``);
+  }
+
   get template() {
     return `<article class="trip-point">
           <i class="trip-icon">${this._type.icon}</i>
@@ -43,7 +51,7 @@ export default class Point {
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
           <ul class="trip-point__offers">
-            ${renderOffers(this._offers)}
+            ${this.renderOffers()}
           </ul>
         </article>`;
   }
