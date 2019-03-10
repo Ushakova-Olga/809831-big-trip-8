@@ -1,6 +1,7 @@
 import makeFilter from './make-filter.js';
-import makePoint from './make-point.js';
 import makeData from './data.js';
+import Point from './point.js';
+import PointOpen from './point-open.js';
 
 const tripFilterForm = document.querySelector(`.trip-filter`);
 const tripDayElement = document.querySelector(`.trip-day__items`);
@@ -15,15 +16,31 @@ const renderTemplate = (template = ``) => {
 };
 
 const renderPoints = (count) => {
-  const fragment = document.createDocumentFragment();
-  let points = new Array(count);
+  tripDayElement.innerHTML = ``;
 
   for (let i = 0; i < count; i++) {
-    points[i] = makeData();
-    fragment.appendChild(renderTemplate(makePoint(points[i])));
+    const pointComponent = new Point(makeData());
+    const pointOpenComponent = new PointOpen(makeData());
+
+    tripDayElement.appendChild(pointComponent.render());
+    pointComponent.onOpen = () => {
+      pointOpenComponent.render();
+      tripDayElement.replaceChild(pointOpenComponent.element, pointComponent.element);
+      pointComponent.unrender();
+    };
+
+    pointOpenComponent.onSubmit = () => {
+      pointComponent.render();
+      tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);
+      pointOpenComponent.unrender();
+    };
+
+    pointOpenComponent.onReset = () => {
+      pointComponent.render();
+      tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);
+      pointOpenComponent.unrender();
+    };
   }
-  tripDayElement.innerHTML = ``;
-  tripDayElement.appendChild(fragment);
 };
 
 const filtersData = [
