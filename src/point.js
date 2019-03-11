@@ -1,7 +1,8 @@
-import {createElement} from './common.js';
+import Component from './component.js';
 
-export default class Point {
+export default class Point extends Component {
   constructor(data) {
+    super();
     this._type = data.type;
     this._city = data.city;
     this._picture = data.picture;
@@ -11,22 +12,14 @@ export default class Point {
     this._duration = data.duration;
     this._description = data.description;
 
-    this._element = null;
-    this._state = {
-      // Состояние компонента
-    };
-
     this._onOpen = null;
+    this._onOpenButtonClick = this._onOpenButtonClick.bind(this);
   }
 
   _onOpenButtonClick() {
     if (typeof this._onOpen === `function`) {
       this._onOpen();
     }
-  }
-
-  get element() {
-    return this._element;
   }
 
   set onOpen(fn) {
@@ -57,21 +50,10 @@ export default class Point {
   }
 
   bind() {
-    this._element.addEventListener(`click`, this._onOpenButtonClick.bind(this));
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
+    this._element.addEventListener(`click`, this._onOpenButtonClick);
   }
 
   unbind() {
-    // Удаление обработчиков
-  }
-
-  unrender() {
-    this.unbind();
-    this._element = null;
+    this._element.removeEventListener(`click`, this._onOpenButtonClick);
   }
 }
