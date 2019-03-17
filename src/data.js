@@ -17,7 +17,9 @@ const getPrice = () => (10 * Math.floor(1 + Math.random() * 5));
 
 const offers = [{name: `Add luggage`, cost: getPrice()},
   {name: `Switch to comfort class`, cost: getPrice()},
-  {name: `Add meal`, cost: getPrice()}];
+  {name: `Add meal`, cost: getPrice()},
+  {name: `Choose seats`, cost: getPrice()},
+];
 
 const getCity = () => ([
   `Amsterdam`,
@@ -58,7 +60,8 @@ const getDescription = (descriptionArray) => {
 const getTime = () => {
   const timeStart = Math.floor(Math.random() * 24);
   const timeEnd = timeStart + 1;
-  return {start: timeStart + `:00`, end: timeEnd + `:00`};
+  //  return {start: timeStart + `:00`, end: timeEnd + `:00`};
+  return timeStart + `:00 — ` + timeEnd + `:00`;
 };
 
 const getDuration = () => ([
@@ -68,7 +71,12 @@ const getDuration = () => ([
   `2H`,
 ][Math.floor(Math.random() * 4)]);
 
+const getDay = () => {
+  return (Date.now() + 1 + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000);
+};
+
 export default () => ({
+  day: getDay(),
   type: getType(),
   city: getCity(),
   picture: `//picsum.photos/100/100?r=${Math.random()}`,
