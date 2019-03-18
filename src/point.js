@@ -1,8 +1,10 @@
 import Component from './component.js';
+import moment from 'moment';
 
 export default class Point extends Component {
   constructor(data) {
     super();
+    this._day = data.type;
     this._type = data.type;
     this._city = data.city;
     this._picture = data.picture;
@@ -39,7 +41,7 @@ export default class Point extends Component {
           <i class="trip-icon">${this._type.icon}</i>
           <h3 class="trip-point__title">${this._type.name} to ${this._city}</h3>
           <p class="trip-point__schedule">
-            <span class="trip-point__timetable">${this._time.start}&nbsp;&mdash; ${this._time.end}</span>
+            <span class="trip-point__timetable">${this._time.start} - ${this._time.end}</span>
             <span class="trip-point__duration">${this._duration}</span>
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
@@ -55,5 +57,25 @@ export default class Point extends Component {
 
   unbind() {
     this._element.removeEventListener(`click`, this._onOpenButtonClick);
+  }
+
+  update(data) {
+    this._type = data.type;
+    this._city = data.city;
+    this._offers = data.offers;
+
+    if (data.time.end !== ``) {
+      this._time.end = data.time.end;
+    }
+
+    if (data.time.start !== ``) {
+      this._time.start = data.time.start;
+    }
+
+    this._price = data.price;
+    const start = Date.parse(moment(this._time.start, `HH:mm`).toDate());
+    const end = Date.parse(moment(this._time.end, `HH:mm`).toDate());
+    this._duration = Math.floor((end - start) / 3600000) + `H ` + Math.ceil(((end - start) % 3600000) / 60000) + `M`;
+
   }
 }

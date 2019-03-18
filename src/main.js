@@ -19,17 +19,28 @@ const renderPoints = (count) => {
   tripDayElement.innerHTML = ``;
 
   for (let i = 0; i < count; i++) {
-    const pointComponent = new Point(makeData());
-    const pointOpenComponent = new PointOpen(makeData());
+    const point = makeData(i);
+    const pointComponent = new Point(point);
+    const pointOpenComponent = new PointOpen(point);
 
     tripDayElement.appendChild(pointComponent.render());
+
     pointComponent.onOpen = () => {
       pointOpenComponent.render();
       tripDayElement.replaceChild(pointOpenComponent.element, pointComponent.element);
       pointComponent.unrender();
     };
 
-    pointOpenComponent.onSubmit = () => {
+    pointOpenComponent.onSubmit = (newObject) => {
+      point.type = newObject.type;
+      point.city = newObject.city;
+      point.picture = newObject.picture;
+      point.offers = newObject.offers;
+      point.time = newObject.time;
+      point.price = newObject.price;
+      point.duration = newObject.duration;
+      point.description = newObject.description;
+      pointComponent.update(point);
       pointComponent.render();
       tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);
       pointOpenComponent.unrender();

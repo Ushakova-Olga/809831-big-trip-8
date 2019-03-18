@@ -17,7 +17,9 @@ const getPrice = () => (10 * Math.floor(1 + Math.random() * 5));
 
 const offers = [{name: `Add luggage`, cost: getPrice()},
   {name: `Switch to comfort class`, cost: getPrice()},
-  {name: `Add meal`, cost: getPrice()}];
+  {name: `Add meal`, cost: getPrice()},
+  {name: `Choose seats`, cost: getPrice()},
+];
 
 const getCity = () => ([
   `Amsterdam`,
@@ -40,10 +42,13 @@ const description = [`Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
   `Nunc fermentum tortor ac porta dapibus.`,
   `In rutrum ac purus sit amet tempus.`];
 
-const getOffersSet = (offersArray) => new Set([
-  offersArray[Math.floor(Math.random() * offersArray.length)],
-  offersArray[Math.floor(Math.random() * offersArray.length)]
-]);
+const getOffersSet = (offersArray) => {
+  const result = [...new Set([
+    offersArray[Math.floor(Math.random() * offersArray.length)],
+    offersArray[Math.floor(Math.random() * offersArray.length)]
+  ])];
+  return result;
+};
 
 const getDescription = (descriptionArray) => {
   const off = new Set([
@@ -68,7 +73,12 @@ const getDuration = () => ([
   `2H`,
 ][Math.floor(Math.random() * 4)]);
 
+const getDay = () => {
+  return (Date.now() + 1 + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000);
+};
+
 export default () => ({
+  day: getDay(),
   type: getType(),
   city: getCity(),
   picture: `//picsum.photos/100/100?r=${Math.random()}`,
