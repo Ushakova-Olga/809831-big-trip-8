@@ -63,8 +63,7 @@ const getDescription = (descriptionArray) => {
 const getTime = () => {
   const timeStart = Math.floor(Math.random() * 24);
   const timeEnd = timeStart + 1;
-  //  return {start: timeStart + `:00`, end: timeEnd + `:00`};
-  return timeStart + `:00 — ` + timeEnd + `:00`;
+  return {start: timeStart + `:00`, end: timeEnd + `:00`};
 };
 
 const getDuration = () => ([

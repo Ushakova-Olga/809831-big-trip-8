@@ -1,6 +1,7 @@
 import Component from './component.js';
 import moment from 'moment';
 import {travelWay, travelWayFirst} from './common.js';
+import flatpickr from 'flatpickr';
 
 export default class PointOpen extends Component {
   constructor(data) {
@@ -27,7 +28,7 @@ export default class PointOpen extends Component {
       type: {},
       city: ``,
       offers: [],
-      time: ``,
+      time: {},
       price: ``,
       duration: ``,
       description: ``,
@@ -137,7 +138,8 @@ export default class PointOpen extends Component {
 
               <label class="point__time">
                 choose time
-                <input class="point__input" type="text" value="${this._time}" name="time" placeholder="${this._time}">
+                <input class="point__input time__start" type="text"  value="${this._time.start}" name="time-start" placeholder="${this._time.start}">
+                <input class="point__input time__end" type="text"  value="${this._time.end}" name="time-end" placeholder="${this._time.end}">
               </label>
 
               <label class="point__price">
@@ -189,6 +191,9 @@ export default class PointOpen extends Component {
       .addEventListener(`reset`, this._onResetButtonClick);
     this._element.querySelector(`.travel-way__select-group`)
       .addEventListener(`change`, this._onChangeTravelWay);
+
+    flatpickr(this._element.querySelector(`.point__time .time__start`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `h:i`, dateFormat: `h:i`});
+    flatpickr(this._element.querySelector(`.point__time .time__end`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `h:i`, dateFormat: `h:i`});
   }
 
   unbind() {
@@ -218,8 +223,11 @@ export default class PointOpen extends Component {
       "destination": (value) => {
         target.city = value;
       },
-      "time": (value) => {
-        target.time = value;
+      "time-start": (value) => {
+        target.time.start = value;
+      },
+      "time-end": (value) => {
+        target.time.end = value;
       },
       "price": (value) => {
         target.price = value;

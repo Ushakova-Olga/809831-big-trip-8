@@ -40,7 +40,7 @@ export default class Point extends Component {
           <i class="trip-icon">${this._type.icon}</i>
           <h3 class="trip-point__title">${this._type.name} to ${this._city}</h3>
           <p class="trip-point__schedule">
-            <span class="trip-point__timetable">${this._time}</span>
+            <span class="trip-point__timetable">${this._time.start} - ${this._time.end}</span>
             <span class="trip-point__duration">${this._duration}</span>
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
