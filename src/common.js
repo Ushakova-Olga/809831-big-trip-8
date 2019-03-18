@@ -26,3 +26,9 @@ export const travelWayFirst = [
   {name: `drive`, icon: `🚗`},
   {name: `flight`, icon: `✈️`},
 ];
+
+export const travelWaySecond = [
+  {name: `check-in`, icon: `🏨`},
+  {name: `sightseeing`, icon: `🏛`},
+  {name: `restaurant`, icon: `🍴`},
+];

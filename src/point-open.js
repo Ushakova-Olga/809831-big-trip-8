@@ -1,6 +1,6 @@
 import Component from './component.js';
 import moment from 'moment';
-import {travelWay, travelWayFirst} from './common.js';
+import {travelWay, travelWayFirst, travelWaySecond} from './common.js';
 import flatpickr from 'flatpickr';
 
 export default class PointOpen extends Component {
@@ -92,8 +92,8 @@ export default class PointOpen extends Component {
     `).join(``);
   }
 
-  renderTravelWaySelect() {
-    return travelWayFirst.map((it) => `
+  renderTravelWaySelect(travelWayData) {
+    return travelWayData.map((it) => `
     <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${it.name}" name="travel-way" value="${it.name}" ${this._type.name.toLocaleLowerCase() === `${it.name}` ? `checked` : ``}>
     <label class="travel-way__select-label" for="travel-way-${it.name}">${it.icon} ${it.name}</label>
     `).join(``);
@@ -113,14 +113,11 @@ export default class PointOpen extends Component {
 
                 <div class="travel-way__select">
                   <div class="travel-way__select-group">
-                    ${this.renderTravelWaySelect()}
+                    ${this.renderTravelWaySelect(travelWayFirst)}
                   </div>
 
                   <div class="travel-way__select-group">
-                    <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in"${this._type.name.toLocaleLowerCase() === `check-in` ? `checked` : ``}>
-                    <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
-                    <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sight-seeing" ${this._type.name.toLocaleLowerCase() === `sight-seeing` ? `checked` : ``}>
-                    <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
+                    ${this.renderTravelWaySelect(travelWaySecond)}
                   </div>
                 </div>
               </div>
