@@ -40,7 +40,6 @@ const renderPoints = (count) => {
       point.price = newObject.price;
       point.duration = newObject.duration;
       point.description = newObject.description;
-
       pointComponent.update(point);
       pointComponent.render();
       tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);

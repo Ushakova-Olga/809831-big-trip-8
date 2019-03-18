@@ -17,9 +17,12 @@ export const travelWay = {
   'restaurant': {name: `Restaurant`, icon: `🍴`},
 };
 
-export const offersDictionary = {
-  'add-luggage': `Add luggage`,
-  'switch-to-comfort-class': `Switch to comfort class`,
-  'add-meal': `Add meal`,
-  'choose-seats': `Choose seats`,
-};
+export const travelWayFirst = [
+  {name: `taxi`, icon: `🚕`},
+  {name: `bus`, icon: `🚌`},
+  {name: `train`, icon: `🚂`},
+  {name: `ship`, icon: `🛳`},
+  {name: `transport`, icon: `🚊`},
+  {name: `drive`, icon: `🚗`},
+  {name: `flight`, icon: `✈️`},
+];

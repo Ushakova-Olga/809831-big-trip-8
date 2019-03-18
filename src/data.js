@@ -42,10 +42,13 @@ const description = [`Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
   `Nunc fermentum tortor ac porta dapibus.`,
   `In rutrum ac purus sit amet tempus.`];
 
-const getOffersSet = (offersArray) => new Set([
-  offersArray[Math.floor(Math.random() * offersArray.length)],
-  offersArray[Math.floor(Math.random() * offersArray.length)]
-]);
+const getOffersSet = (offersArray) => {
+  const result = [...new Set([
+    offersArray[Math.floor(Math.random() * offersArray.length)],
+    offersArray[Math.floor(Math.random() * offersArray.length)]
+  ])];
+  return result;
+};
 
 const getDescription = (descriptionArray) => {
   const off = new Set([

@@ -1,6 +1,6 @@
 import Component from './component.js';
 import moment from 'moment';
-import {travelWay, offersDictionary} from './common.js';
+import {travelWay, travelWayFirst} from './common.js';
 
 export default class PointOpen extends Component {
   constructor(data) {
@@ -26,7 +26,7 @@ export default class PointOpen extends Component {
     const entry = {
       type: {},
       city: ``,
-      offers: new Set(),
+      offers: [],
       time: ``,
       price: ``,
       duration: ``,
@@ -54,7 +54,7 @@ export default class PointOpen extends Component {
   }
 
   _onChangeTravelWay() {
-    let travelWayContainer = this._element.querySelector(`.travel-way__select-group`);
+    let travelWayContainer = this._element.querySelector(`.travel-way__select`);
     let checked = travelWayContainer.querySelector(`input:checked`);
     this._type.name = travelWay[checked.value].name;
     this._type.icon = travelWay[checked.value].icon;
@@ -84,10 +84,17 @@ export default class PointOpen extends Component {
 
   renderOffers() {
     return [...this._offers].map((it) => `
-    <input class="point__offers-input visually-hidden" type="checkbox" id="${it.name.toLocaleLowerCase().split(` `).join(`-`)}" name="offer" value="${it.name.toLocaleLowerCase().split(` `).join(`-`)}">
+    <input class="point__offers-input visually-hidden" type="checkbox" id="${it.name.toLocaleLowerCase().split(` `).join(`-`)}" name="offer" value="${it.name}:${it.cost}">
     <label for="${it.name.toLocaleLowerCase().split(` `).join(`-`)}" class="point__offers-label">
-      <span class="point__offer-service">${it.name}</span> + €<span class="point__offer-price" name="offer-price">${it.cost}</span>
+      <span class="point__offer-service">${it.name}</span> + €<span class="point__offer-price">${it.cost}</span>
     </label>
+    `).join(``);
+  }
+
+  renderTravelWaySelect() {
+    return travelWayFirst.map((it) => `
+    <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${it.name}" name="travel-way" value="${it.name}" ${this._type.name.toLocaleLowerCase() === `${it.name}` ? `checked` : ``}>
+    <label class="travel-way__select-label" for="travel-way-${it.name}">${it.icon} ${it.name}</label>
     `).join(``);
   }
 
@@ -105,14 +112,7 @@ export default class PointOpen extends Component {
 
                 <div class="travel-way__select">
                   <div class="travel-way__select-group">
-                    <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-taxi" name="travel-way" value="taxi" ${this._type.name.toLocaleLowerCase() === `taxi` ? `checked` : ``}>
-                    <label class="travel-way__select-label" for="travel-way-taxi">🚕 taxi</label>
-                      <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-bus" name="travel-way" value="bus" ${this._type.name.toLocaleLowerCase() === `bus` ? `checked` : ``}>
-                    <label class="travel-way__select-label" for="travel-way-bus">🚌 bus</label>
-                      <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train"${this._type.name.toLocaleLowerCase() === `train` ? `checked` : ``}>
-                    <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
-                      <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" ${this._type.name.toLocaleLowerCase() === `flight` ? `checked` : ``}>
-                    <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
+                    ${this.renderTravelWaySelect()}
                   </div>
 
                   <div class="travel-way__select-group">
@@ -201,16 +201,15 @@ export default class PointOpen extends Component {
   }
 
   update(data) {
-    this._type = data.type;
     this._city = data.city;
     this._offers = data.offers;
     this._time = data.time;
     this._price = data.price;
     this._duration = data.duration;
+    this._type = data.type ? data.type : this._type;
   }
 
   static createMapper(target) {
-    let offerStr = ``;
     return {
       "travel-way": (value) => {
         target.type.name = travelWay[value].name;
@@ -226,11 +225,9 @@ export default class PointOpen extends Component {
         target.price = value;
       },
       "offer": (value) => {
-        offerStr = offersDictionary[value];
+        let arr = value.split(`:`);
+        target.offers.push({name: arr[0], cost: arr[1]});
       },
-      "offer-price": (value) =>{
-        target.offers.add({offerStr, value});
-      }
     };
   }
 }
