@@ -28,7 +28,7 @@ export default class PointOpen extends Component {
       type: {},
       city: ``,
       offers: [],
-      time: {},
+      time: {start: ``, end: ``},
       price: ``,
       duration: ``,
       description: ``,
@@ -192,8 +192,8 @@ export default class PointOpen extends Component {
     this._element.querySelector(`.travel-way__select-group`)
       .addEventListener(`change`, this._onChangeTravelWay);
 
-    flatpickr(this._element.querySelector(`.point__time .time__start`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `h:i`, dateFormat: `h:i`});
-    flatpickr(this._element.querySelector(`.point__time .time__end`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `h:i`, dateFormat: `h:i`});
+    flatpickr(this._element.querySelector(`.point__time .time__start`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `H:i`, dateFormat: `H:i`});
+    flatpickr(this._element.querySelector(`.point__time .time__end`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `H:i`, dateFormat: `H:i`});
   }
 
   unbind() {
@@ -208,10 +208,17 @@ export default class PointOpen extends Component {
   update(data) {
     this._city = data.city;
     this._offers = data.offers;
-    this._time = data.time;
     this._price = data.price;
     this._duration = data.duration;
     this._type = data.type ? data.type : this._type;
+
+    if (data.time.end !== ``) {
+      this._time.end = data.time.end;
+    }
+
+    if (data.time.start !== ``) {
+      this._time.start = data.time.start;
+    }
   }
 
   static createMapper(target) {

@@ -1,4 +1,5 @@
 import Component from './component.js';
+import moment from 'moment';
 
 export default class Point extends Component {
   constructor(data) {
@@ -62,8 +63,19 @@ export default class Point extends Component {
     this._type = data.type;
     this._city = data.city;
     this._offers = data.offers;
-    this._time = data.time;
+
+    if (data.time.end !== ``) {
+      this._time.end = data.time.end;
+    }
+
+    if (data.time.start !== ``) {
+      this._time.start = data.time.start;
+    }
+
     this._price = data.price;
-    this._duration = data.duration;
+    const start = Date.parse(moment(this._time.start, `HH:mm`).toDate());
+    const end = Date.parse(moment(this._time.end, `HH:mm`).toDate());
+    this._duration = Math.floor((end - start) / 3600000) + `H ` + Math.ceil(((end - start) % 3600000) / 60000) + `M`;
+
   }
 }
