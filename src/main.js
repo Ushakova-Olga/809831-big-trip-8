@@ -33,8 +33,7 @@ const renderFilters = (data, points) => {
 
   data.forEach((filter) => {
     const filterComponent = new Filter(filter);
-    tripFilterForm.appendChild(filterComponent.render()[0]);
-    tripFilterForm.appendChild(filterComponent.render()[1]);
+    tripFilterForm.appendChild(filterComponent.render());
 
     filterComponent.onFilter = () => {
       containerStatistic.classList.add(`visually-hidden`);
@@ -101,6 +100,7 @@ const filtersData = [
 let points = [];
 points = createPoints(25);
 renderFilters(filtersData, points);
+
 const onClickStatistic = function (evt) {
   evt.preventDefault();
   containerStatistic.classList.remove(`visually-hidden`);
@@ -110,3 +110,10 @@ const onClickStatistic = function (evt) {
 };
 
 statsElement.addEventListener(`click`, onClickStatistic);
+
+const onClickTable = function (evt) {
+  evt.preventDefault();
+  containerStatistic.classList.add(`visually-hidden`);
+  document.querySelector(`main`).classList.remove(`visually-hidden`);
+};
+document.querySelector(`.view-switch__item`).addEventListener(`click`, onClickTable);

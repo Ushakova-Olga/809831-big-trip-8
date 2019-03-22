@@ -1,4 +1,4 @@
-import {createElements} from './common.js';
+import {createElement} from './common.js';
 import Component from './component.js';
 
 export default class Filter extends Component {
@@ -27,21 +27,23 @@ export default class Filter extends Component {
   get template() {
     const checked = this._checked ? `checked` : ``;
     return `
-    <input type="radio" id="filter-${this._id}" name="filter" value="${this._id}" ${checked}>
-    <label class="trip-filter__item" for="filter-${this._id}">${this._name}</label>  `;
+    <label class="trip-filter__item" for="filter-${this._id}">
+      <input type="radio" id="filter-${this._id}" name="filter" value="${this._id}" ${checked}/>
+      <span class="trip-filter__item--name">${this._name}</span>
+    </label>  `;
   }
 
   render() {
-    this._element = createElements(this.template);
+    this._element = createElement(this.template);
     this.bind();
     return this._element;
   }
 
   bind() {
-    this._element[0].addEventListener(`change`, this._onFilter);
+    this._element.addEventListener(`change`, this._onFilter);
   }
 
   unbind() {
-    this._element[0].removeEventListener(`change`, this._onFilter);
+    this._element.removeEventListener(`change`, this._onFilter);
   }
 }

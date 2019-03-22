@@ -150,15 +150,19 @@ a.view-switch__item--active:link {
   font-size: var(--font-size-smaller);
   font-weight: 800;
   margin-right: 16px;
-  opacity: 0.7;
   text-transform: uppercase;
   cursor: pointer;
 }
-.trip-filter__item:hover {
+
+.trip-filter__item--name {
+  opacity: 0.7;
+}
+
+.trip-filter__item--name:hover {
   opacity: 0.5;
 }
 
-input[type=radio]:checked + .trip-filter__item {
+input[type=radio]:checked + .trip-filter__item--name {
   opacity: 1;
 }
 
