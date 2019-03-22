@@ -1,25 +1,63 @@
-import makeFilter from './make-filter.js';
 import makeData from './data.js';
 import Point from './point.js';
 import PointOpen from './point-open.js';
+import Filter from './filter.js';
+import {createMoneyChart, createTransportChart} from './statistik.js';
 
 const tripFilterForm = document.querySelector(`.trip-filter`);
 const tripDayElement = document.querySelector(`.trip-day__items`);
+const statsElement = document.querySelector(`#stats`);
+const moneyCtx = document.querySelector(`.statistic__money`);
+const transportCtx = document.querySelector(`.statistic__transport`);
+const containerStatistic = document.querySelector(`.statistic`);
+
 const maxPoints = 10;
 
 const getRandom = (count) => Math.floor(count * Math.random());
 
-const renderTemplate = (template = ``) => {
-  const templateElement = document.createElement(`template`);
-  templateElement.innerHTML = template;
-  return templateElement.content;
+const createPoints = (count) => {
+  const points = [];
+  for (let i = 0; i < count; i++) {
+    points.push(makeData(i));
+  }
+  return points;
 };
 
-const renderPoints = (count) => {
+const deletePoint = (points, i) => {
+  points.splice(i, 1);
+  return points;
+};
+
+const renderFilters = (data, points) => {
+  tripFilterForm.innerHTML = ``;
+
+  data.forEach((filter) => {
+    const filterComponent = new Filter(filter);
+    tripFilterForm.appendChild(filterComponent.render());
+
+    filterComponent.onFilter = () => {
+      containerStatistic.classList.add(`visually-hidden`);
+      document.querySelector(`main`).classList.remove(`visually-hidden`);
+      switch (filterComponent._name) {
+        case `Everything`:
+          return renderPoints(points);
+
+        case `Past`:
+          return renderPoints(points.filter((it) => it.day < Date.now()));
+
+        case `Future`:
+          return renderPoints(points.filter((it) => it.day > Date.now()));
+      }
+      return renderPoints(points);
+    };
+  });
+};
+
+const renderPoints = (points) => {
   tripDayElement.innerHTML = ``;
 
-  for (let i = 0; i < count; i++) {
-    const point = makeData(i);
+  for (let i = 0; i < points.length; i++) {
+    const point = points[i];
     const pointComponent = new Point(point);
     const pointOpenComponent = new PointOpen(point);
 
@@ -47,8 +85,7 @@ const renderPoints = (count) => {
     };
 
     pointOpenComponent.onReset = () => {
-      pointComponent.render();
-      tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);
+      deletePoint(points, i);
       pointOpenComponent.unrender();
     };
   }
@@ -60,18 +97,27 @@ const filtersData = [
   {id: `past`, name: `Past`, count: getRandom(maxPoints), checked: false}
 ];
 
-const renderFilter = (data) => {
-  const fragment = renderTemplate(makeFilter(data));
-  const input = fragment.querySelector(`input`);
-  input.addEventListener(`change`, () => renderPoints(data.count));
-  return fragment;
+let points = [];
+points = createPoints(25);
+renderFilters(filtersData, points);
+
+const onClickStatistic = function (evt) {
+  evt.preventDefault();
+  containerStatistic.classList.remove(`visually-hidden`);
+  document.querySelector(`main`).classList.add(`visually-hidden`);
+  document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
+  document.querySelector(`.view-switch__item--stats`).classList.add(`view-switch__item--active`);
+  createMoneyChart(moneyCtx);
+  createTransportChart(transportCtx);
 };
 
-const renderFilters = (data) => {
-  const fragment = document.createDocumentFragment();
-  data.forEach((filter) => fragment.appendChild(renderFilter(filter)));
-  tripFilterForm.innerHTML = ``;
-  tripFilterForm.appendChild(fragment);
-};
+statsElement.addEventListener(`click`, onClickStatistic);
 
-renderFilters(filtersData);
+const onClickTable = function (evt) {
+  evt.preventDefault();
+  containerStatistic.classList.add(`visually-hidden`);
+  document.querySelector(`main`).classList.remove(`visually-hidden`);
+  document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
+  document.querySelector(`.view-switch__item--table`).classList.add(`view-switch__item--active`);
+};
+document.querySelector(`.view-switch__item`).addEventListener(`click`, onClickTable);

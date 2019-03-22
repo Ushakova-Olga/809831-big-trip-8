@@ -4,7 +4,7 @@ import moment from 'moment';
 export default class Point extends Component {
   constructor(data) {
     super();
-    this._day = data.type;
+    this._day = data.day;
     this._type = data.type;
     this._city = data.city;
     this._picture = data.picture;
