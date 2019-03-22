@@ -105,6 +105,8 @@ const onClickStatistic = function (evt) {
   evt.preventDefault();
   containerStatistic.classList.remove(`visually-hidden`);
   document.querySelector(`main`).classList.add(`visually-hidden`);
+  document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
+  document.querySelector(`.view-switch__item--stats`).classList.add(`view-switch__item--active`);
   createMoneyChart(moneyCtx);
   createTransportChart(transportCtx);
 };
@@ -115,5 +117,7 @@ const onClickTable = function (evt) {
   evt.preventDefault();
   containerStatistic.classList.add(`visually-hidden`);
   document.querySelector(`main`).classList.remove(`visually-hidden`);
+  document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
+  document.querySelector(`.view-switch__item--table`).classList.add(`view-switch__item--active`);
 };
 document.querySelector(`.view-switch__item`).addEventListener(`click`, onClickTable);
