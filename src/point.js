@@ -1,18 +1,23 @@
 import Component from './component.js';
 import moment from 'moment';
+import {travelWay} from './common.js';
 
 export default class Point extends Component {
+  _getDuration() {
+    const start = this._time.start;
+    const end = this._time.end;
+    return (Math.floor((end - start) / 3600000) + `H ` + Math.ceil(((end - start) % 3600000) / 60000) + `M`);
+  }
   constructor(data) {
     super();
-    this._day = data.day;
+    this._id = data.id;
     this._type = data.type;
-    this._city = data.city;
-    this._picture = data.picture;
     this._offers = data.offers;
     this._time = data.time;
     this._price = data.price;
-    this._duration = data.duration;
-    this._description = data.description;
+    this._destination = data.destination;
+    this._isFavorite = data.isFavorite;
+    this._duration = this._getDuration();
 
     this._onOpen = null;
     this._onOpenButtonClick = this._onOpenButtonClick.bind(this);
@@ -31,17 +36,21 @@ export default class Point extends Component {
   renderOffers() {
     return [...this._offers].map((it) => `
     <li>
-      <button class="trip-point__offer">${it.name}+&euro;&nbsp;${it.cost}</button>
+      <button class="trip-point__offer">${it.title}+&euro;&nbsp;${it.price}</button>
     </li>
     `).join(``);
   }
 
+  renderTime(time) {
+    return moment(time).format(`h:mm`);
+  }
+
   get template() {
     return `<article class="trip-point">
-          <i class="trip-icon">${this._type.icon}</i>
-          <h3 class="trip-point__title">${this._type.name} to ${this._city}</h3>
+          <i class="trip-icon">${travelWay[this._type].icon}</i>
+          <h3 class="trip-point__title">${this._type} to ${this._destination.name}</h3>
           <p class="trip-point__schedule">
-            <span class="trip-point__timetable">${this._time.start} - ${this._time.end}</span>
+            <span class="trip-point__timetable">${this.renderTime(this._time.start)} - ${this.renderTime(this._time.end)}</span>
             <span class="trip-point__duration">${this._duration}</span>
           </p>
           <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
@@ -61,8 +70,8 @@ export default class Point extends Component {
 
   update(data) {
     this._type = data.type;
-    this._city = data.city;
     this._offers = data.offers;
+    this._destination = data.destination;
 
     if (data.time.end !== ``) {
       this._time.end = data.time.end;
@@ -73,9 +82,6 @@ export default class Point extends Component {
     }
 
     this._price = data.price;
-    const start = Date.parse(moment(this._time.start, `HH:mm`).toDate());
-    const end = Date.parse(moment(this._time.end, `HH:mm`).toDate());
-    this._duration = Math.floor((end - start) / 3600000) + `H ` + Math.ceil(((end - start) % 3600000) / 60000) + `M`;
-
+    this._duration = this._getDuration();
   }
 }
