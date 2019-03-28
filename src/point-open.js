@@ -103,12 +103,15 @@ export default class PointOpen extends Component {
   }
 
   renderOffers() {
-    return [...this._offers].map((it) => `
-    <input class="point__offers-input visually-hidden" type="checkbox" id="${it.title ? it.title.toLocaleLowerCase().split(` `).join(`-`) : ``}${it.price}" name="offer" value="${it.title}:${it.price}" ${it.accepted ? `checked` : ``}>
-    <label for="${it.title ? it.title.toLocaleLowerCase().split(` `).join(`-`) : ``}${it.price}" class="point__offers-label">
+    return [...this._offers].map((it) => {
+      const titleDashed = it.title ? it.title.toLocaleLowerCase().split(` `).join(`-`) : ``;
+      return `
+    <input class="point__offers-input visually-hidden" type="checkbox" id="${titleDashed}${it.price}" name="offer" value="${it.title}:${it.price}" ${it.accepted ? `checked` : ``}>
+    <label for="${titleDashed}${it.price}" class="point__offers-label">
       <span class="point__offer-service">${it.title}</span> + €<span class="point__offer-price">${it.price}</span>
     </label>
-    `).join(``);
+    `;
+    }).join(``);
   }
 
   renderTravelWaySelect(travelWayData) {
@@ -291,7 +294,7 @@ export default class PointOpen extends Component {
       "destination": (value) => {
         target.destination.name = value;
         target.destination.description = destinationsDict[value].description;
-        target.destination.pictures = destinationsDict[value].pictures;
+        target.destination.pictures = [...destinationsDict[value].pictures];
       },
       "date-start": (value) => {
         target.time.start = value ? Date.parse(moment(value, `h:mm`).toDate()) : ``;

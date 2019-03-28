@@ -11,7 +11,7 @@ const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
 const containerStatistic = document.querySelector(`.statistic`);
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA8`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA6`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});

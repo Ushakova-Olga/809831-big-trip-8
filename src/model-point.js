@@ -7,15 +7,7 @@ export default class ModelPoint {
       this.price = data[`base_price`];
       this.destination = data[`destination`];
       this.isFavorite = data[`is_favorite`];
-      let off = [];
-      data[`offers`].forEach((it) => {
-        let title2 = `unnamed`;
-        if (it.title) {
-          title2 = it.title;
-        }
-        off.push({title: title2, price: it.price, accepted: it.accepted});
-      });
-      this.offers = new Set(off);
+      this.offers = new Set(data[`offers`]);
     }
   }
 
@@ -23,7 +15,7 @@ export default class ModelPoint {
     return {
       'id': this.id,
       'type': this.type,
-      'offers': [...this.offers.values()],
+      'offers': [...this.offers],
       'date_from': this.time.start,
       'date_to': this.time.end,
       'base_price': this.price,
