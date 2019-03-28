@@ -77,7 +77,7 @@ export default class PointOpen extends Component {
   _onChangeDestination() {
     let destinationInput = this._element.querySelector(`.point__destination-input`);
     this._destination = destinationsDict[destinationInput.value];
-
+    this._destination.pictures = [...this._destination.pictures];
     this.unbind();
     this._partialUpdate();
     this.bind();
@@ -131,7 +131,7 @@ export default class PointOpen extends Component {
   renderDestinationImages() {
     return `
     <div class="point__destination-images">
-      ${this._destination.pictures.map((it) => `
+      ${[...this._destination.pictures].map((it) => `
         <img src="${it.src}" alt="${it.description}" class="point__destination-image">
         `).join(``)}
     </div>`;
@@ -142,7 +142,7 @@ export default class PointOpen extends Component {
                 <header class="point__header">
                   <label class="point__date">
                     choose day
-                    <input class="point__input" type="text" placeholder="${moment(this._day).format(`MMM D`)}" name="day">
+                    <input class="point__input" type="text" placeholder="18 Mar" name="day">
                   </label>
                     <div class="travel-way">
                     <label class="travel-way__label" for="travel-way__toggle">${travelWay[this._type].icon}</label>
@@ -241,19 +241,13 @@ export default class PointOpen extends Component {
   }
 
   update(data) {
-    this._city = data.city;
+    this._destination = data.destination;
     this._offers = data.offers;
     this._price = data.price;
-    this._duration = data.duration;
-    this._type = data.type ? data.type : this._type;
-
-    if (data.time.end !== ``) {
-      this._time.end = data.time.end;
-    }
-
-    if (data.time.start !== ``) {
-      this._time.start = data.time.start;
-    }
+    this._type = data.type;// ? data.type : this._type;
+    this._time.end = data.time.end;
+    this._time.start = data.time.start;
+    this._duration = this._getDuration();
   }
 
   blockSave() {

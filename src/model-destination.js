@@ -9,7 +9,7 @@ export default class ModelDestination {
     return new ModelDestination(data);
   }
 
-  static parseDestination(data) {
+  static parseDestinations(data) {
     return data.map(ModelDestination.parseDestination);
   }
 }

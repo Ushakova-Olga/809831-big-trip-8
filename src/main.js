@@ -11,7 +11,7 @@ const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
 const containerStatistic = document.querySelector(`.statistic`);
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA8`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
@@ -88,10 +88,13 @@ const renderPoints = (points) => {
       pointOpenComponent.onSubmit = (newObject) => {
         pointOpenComponent.blockSave();
         point.type = newObject.type;
-        point.city = newObject.city;
-        point.picture = newObject.picture;
         point.offers = newObject.offers;
-        point.time = newObject.time;
+        if (newObject.time.start !== ``) {
+          point.time.start = newObject.time.start;
+        }
+        if (newObject.time.end !== ``) {
+          point.time.end = newObject.time.end;
+        }
         point.price = newObject.price;
         point.destination = newObject.destination;
 
@@ -160,7 +163,7 @@ api.getDestinations()
 api.getOffers()
 .then((offers) => {
   offers.forEach((it) =>{
-    offersDict[it.type] = it.offers.map((iit) => ({title: iit, price: ``, accepted: false}));
+    offersDict[it.type] = it.offers.map((iit) => ({title: iit.name, price: iit.price, accepted: false}));
   });
 });
 
