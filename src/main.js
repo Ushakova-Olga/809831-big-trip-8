@@ -3,6 +3,8 @@ import PointOpen from './point-open.js';
 import Filter from './filter.js';
 import {createMoneyChart, createTransportChart} from './statistik.js';
 import API from './api.js';
+import Provider from './provider.js';
+import Store from './store.js';
 
 const tripFilterForm = document.querySelector(`.trip-filter`);
 const tripDayElement = document.querySelector(`.trip-day__items`);
@@ -14,7 +16,22 @@ const containerStatistic = document.querySelector(`.statistic`);
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA6`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 
+const storeKey = {
+  'points': `points-store-key`,
+  'destinations': `destinations-store-key`,
+  'offers': `offers-store-key`,
+};
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+const store = new Store({key: storeKey, storage: localStorage});
+const provider = new Provider({api, store, generateId: () => String(Date.now())});
+
+window.addEventListener(`offline`, () => {
+  document.title = `${document.title}[OFFLINE]`;
+});
+window.addEventListener(`online`, () => {
+  document.title = document.title.split(`[OFFLINE]`)[0];
+  provider.syncPoints();
+});
 
 export let destinationsData = [];
 export let destinationsDict = {};
@@ -98,7 +115,7 @@ const renderPoints = (points) => {
         point.price = newObject.price;
         point.destination = newObject.destination;
 
-        api.updatePoint({id: point.id, data: point.toRAW()})
+        provider.updatePoint({id: point.id, data: point.toRAW()})
         .then((response) => {
           if (response) {
             pointComponent.update(response);
@@ -118,7 +135,7 @@ const renderPoints = (points) => {
       pointOpenComponent.onDelete = ({id}) => {
         pointOpenComponent.blockDelete();
 
-        api.deletePoint({id})
+        provider.deletePoint({id})
           .then(() => api.getPoints())
           .then((pointsNew) => {
             let pointsNew2 = deleteEmptyPoints(pointsNew);
@@ -151,7 +168,7 @@ const stopLoadPoints = () => {
 
 };
 
-api.getDestinations()
+provider.getDestinations()
 .then((destinations) => {
   destinationsData = destinations;
   destinations.forEach((it) =>{
@@ -160,7 +177,7 @@ api.getDestinations()
 })
 .catch();
 
-api.getOffers()
+provider.getOffers()
 .then((offers) => {
   offers.forEach((it) =>{
     offersDict[it.type] = it.offers.map((iit) => ({title: iit.name, price: iit.price, accepted: false}));
@@ -169,7 +186,7 @@ api.getOffers()
 
 startLoadPoints();
 
-api.getPoints()
+provider.getPoints()
   .then((points) => {
     renderFilters(filtersData, points);
   })
