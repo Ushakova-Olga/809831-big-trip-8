@@ -75,4 +75,13 @@ export default class API {
         throw err;
       });
   }
+
+  syncPoints({points}) {
+    return this._load({
+      url: `points/sync`,
+      method: Method.POST,
+      body: JSON.stringify(points),
+      headers: new Headers({'Content-Type': `application/json`})
+    });
+  }
 }

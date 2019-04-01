@@ -4,23 +4,30 @@ export default class Store {
     this._storeKey = key;
   }
 
-  setItem({key, item, sKey}) {
-    const items = this.getAll({storeKey: sKey});
-    items[key] = item;
+  setItem({key, item, storeKey}) {
+    let items = {};
+    if (this.getAll({storeKey: [storeKey]}) !== null) {
+      items = this.getAll({storeKey: [storeKey]});
+    }
 
-    this._storage.setItem(this._storeKey[sKey], JSON.stringify(items));
+    items[key] = item;
+    this._storage.setItem(this._storeKey[storeKey], JSON.stringify(items));
   }
 
-  getItem({key, sKey}) {
-    const items = this.getAll({storeKey: sKey});
+  setItems({items, storeKey}) {
+    this._storage.setItem(this._storeKey[storeKey], JSON.stringify(items));
+  }
+
+  getItem({key, storeKey}) {
+    const items = this.getAll({storeKey: [storeKey]});
     return items[key];
   }
 
-  removeItem({key, sKey}) {
-    const items = this.getAll({storeKey: sKey});
+  removeItem({key, storeKey}) {
+    const items = this.getAll({storeKey: [storeKey]});
     delete items[key];
 
-    this._storage.setItem(this._storeKey[sKey], JSON.stringify(items));
+    this._storage.setItem(this._storeKey[storeKey], JSON.stringify(items));
   }
 
   getAll({storeKey}) {

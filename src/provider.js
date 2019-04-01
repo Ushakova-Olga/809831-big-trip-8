@@ -49,11 +49,11 @@ export default class Provider {
     if (this._isOnline()) {
       return this._api.deletePoint({id})
         .then(() => {
-          this._store.removeItem({key: id});
+          this._store.removeItem({key: id, storeKey: `points`});
         });
     } else {
       this._needSync = true;
-      this._store.removeItem({key: id});
+      this._store.removeItem({key: id, storeKey: `points`});
       return Promise.resolve(true);
     }
   }
@@ -62,7 +62,13 @@ export default class Provider {
     if (this._isOnline()) {
       return this._api.getPoints()
         .then((points) => {
-          points.map((it) => this._store.setItem({key: it.id, item: it, storeKey: `points`}));
+          let pointsNew = {};
+          points.forEach((it) => {
+            if (it.id) {
+              pointsNew[it.id] = it;
+            }
+          });
+          this._store.setItems({items: pointsNew, storeKey: `points`});
           return ModelPoint.parsePoints(points);
         });
     } else {
@@ -78,7 +84,15 @@ export default class Provider {
     if (this._isOnline()) {
       return this._api.getDestinations()
         .then((destinations) => {
-          destinations.map((it) => this._store.setItem({key: it.name, item: it, storeKey: `destinations`}));
+          let destinationsNew = {};
+
+          destinations.forEach((it)=> {
+            if (it.name) {
+              destinationsNew[it.name] = it;
+            }
+          });
+
+          this._store.setItems({items: destinationsNew, storeKey: `destinations`});
           return ModelDestination.parseDestinations(destinations);
         });
     } else {
@@ -94,7 +108,15 @@ export default class Provider {
     if (this._isOnline()) {
       return this._api.getOffers()
         .then((offers) => {
-          offers.map((it) => this._store.setItem({key: it.type, item: it, storeKey: `offers`}));
+          let offersNew = {};
+
+          offers.forEach((it)=> {
+            if (it.type) {
+              offersNew[it.type] = it;
+            }
+          });
+
+          this._store.setItems({items: offersNew, storeKey: `offers`});
           return ModelOffer.parseOffers(offers);
         });
     } else {
