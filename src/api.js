@@ -1,6 +1,4 @@
 import ModelPoint from './model-point.js';
-import ModelDestination from './model-destination.js';
-import ModelOffer from './model-offer.js';
 
 const Method = {
   GET: `GET`,
@@ -21,7 +19,6 @@ const toJSON = (response) => {
   return response.json();
 };
 
-
 export default class API {
   constructor({endPoint, authorization}) {
     this._endPoint = endPoint;
@@ -30,20 +27,17 @@ export default class API {
 
   getPoints() {
     return this._load({url: `points`})
-      .then(toJSON)
-      .then(ModelPoint.parsePoints);
+      .then(toJSON);
   }
 
   getDestinations() {
     return this._load({url: `destinations`})
-      .then(toJSON)
-      .then(ModelDestination.parseDestinations);
+      .then(toJSON);
   }
 
   getOffers() {
     return this._load({url: `offers`})
-      .then(toJSON)
-      .then(ModelOffer.parseOffers);
+      .then(toJSON);
   }
 
   createPoint({point}) {
@@ -80,5 +74,14 @@ export default class API {
       .catch((err) => {
         throw err;
       });
+  }
+
+  syncPoints({points}) {
+    return this._load({
+      url: `points/sync`,
+      method: Method.POST,
+      body: JSON.stringify(points),
+      headers: new Headers({'Content-Type': `application/json`})
+    });
   }
 }
