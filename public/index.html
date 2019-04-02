@@ -165,6 +165,17 @@
     <canvas class="statistic__time-spend" width="900"></canvas>
   </div>
 </section>
+<script>
+  navigator.serviceWorker.register(`./sw.js`)
+    .then(function(reg) {
+      // регистрация сработала
+      console.log(`Registration succeeded. Scope is ${reg.scope}`);
+    })
+    .catch(function(error) {
+      // регистрация прошла неудачно
+      console.log(`Registration failed with ${error}`);
+    });
+</script>
 <script src= "bundle.js"></script>
 </body>
 </html>
