@@ -6,9 +6,7 @@ import {destinationsData, destinationsDict, offersDict} from './main.js';
 
 export default class PointOpen extends Component {
   _getDuration() {
-    const start = Date.parse(moment(this._time.start, `HH:mm`).toDate());
-    const end = Date.parse(moment(this._time.end, `HH:mm`).toDate());
-    return (Math.floor((end - start) / 3600000) + `H ` + Math.ceil(((end - start) % 3600000) / 60000) + `M`);
+    return (`${Math.floor((this._time.end - this._time.start) / 3600000)}H ${Math.ceil(((this._time.end - this._time.start) % 3600000) / 60000)}M`);
   }
 
   constructor(data) {
@@ -27,6 +25,7 @@ export default class PointOpen extends Component {
 
     this._onChangeTravelWay = this._onChangeTravelWay.bind(this);
     this._onChangeDestination = this._onChangeDestination.bind(this);
+    this._onChangeFavorite = this._onChangeDestination.bind(this);
 
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onDelete = null;
@@ -81,6 +80,10 @@ export default class PointOpen extends Component {
     this.unbind();
     this._partialUpdate();
     this.bind();
+  }
+
+  _onChangeFavorite() {
+    this._isFavorite = !this._isFavorite;
   }
 
   _partialUpdate() {
@@ -140,6 +143,15 @@ export default class PointOpen extends Component {
     </div>`;
   }
 
+  renderFavorite() {
+    let checked = (this._isFavorite) ? `checked` : ``;
+    return `
+    <div class="paint__favorite-wrap">
+      <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${checked}>
+      <label class="point__favorite" for="favorite">favorite</label>
+    </div>`;
+  }
+
   innerTemplate() {
     return `<form action="" method="get">
                 <header class="point__header">
@@ -148,7 +160,7 @@ export default class PointOpen extends Component {
                     <input class="point__input" type="text" placeholder="18 Mar" name="day">
                   </label>
                     <div class="travel-way">
-                    <label class="travel-way__label" for="travel-way__toggle">${travelWay[this._type].icon}</label>
+                    <label class="travel-way__label" for="travel-way__toggle">${this._type ? travelWay[this._type].icon : ``}</label>
                       <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
                     <div class="travel-way__select">
@@ -168,8 +180,8 @@ export default class PointOpen extends Component {
 
                   <label class="point__time">
                     choose time
-                    <input class="point__input date__start" type="text"  value="${moment(this._time.start).format(`h:mm`)}" name="date-start" placeholder="${moment(this._time.start).format(`h:mm`)}">
-                    <input class="point__input date__end" type="text"  value="${moment(this._time.end).format(`h:mm`)}" name="date-end" placeholder="${moment(this._time.end).format(`h:mm`)}">
+                    <input class="point__input date__start" type="text"  value="${moment(this._time.start).format(`YYYY-MM-DD HH:mm`)}" name="date-start" placeholder="${moment(this._time.start).format(`HH:mm`)}">
+                    <input class="point__input date__end" type="text"  value="${moment(this._time.end).format(`YYYY-MM-DD HH:mm`)}" name="date-end" placeholder="${moment(this._time.end).format(`HH:mm`)}">
                   </label>
 
                   <label class="point__price">
@@ -182,11 +194,8 @@ export default class PointOpen extends Component {
                     <button class="point__button point__button--save" type="submit">Save</button>
                     <button class="point__button point__button--delete" type="reset">Delete</button>
                   </div>
+                  ${this.renderFavorite()}
 
-                  <div class="paint__favorite-wrap">
-                    <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite">
-                    <label class="point__favorite" for="favorite">favorite</label>
-                  </div>
                 </header>
 
                 <section class="point__details">
@@ -222,11 +231,15 @@ export default class PointOpen extends Component {
     this._element.querySelector(`.point__destination-input`)
       .addEventListener(`change`, this._onChangeDestination);
 
+    this._element.querySelector(`.point__favorite`)
+        .addEventListener(`change`, this._onChangeFavorite);
+
     this._element.querySelector(`form`)
     .addEventListener(`reset`, this._onDeleteButtonClick);
 
-    flatpickr(this._element.querySelector(`.point__time .date__start`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `H:i`, dateFormat: `H:i`});
-    flatpickr(this._element.querySelector(`.point__time .date__end`), {enableTime: true, noCalendar: true, altInput: true, altFormat: `H:i`, dateFormat: `H:i`});
+    flatpickr(this._element.querySelector(`.point__date .point__input`), {altInput: true, altFormat: `j F`, dateFormat: `j F Y`});
+    flatpickr(this._element.querySelector(`.point__time .date__start`), {enableTime: true, noCalendar: false, altInput: true, altFormat: `H:i`, dateFormat: `Y-m-d H:i`});
+    flatpickr(this._element.querySelector(`.point__time .date__end`), {enableTime: true, noCalendar: false, altInput: true, altFormat: `H:i`, dateFormat: `Y-m-d H:i`});
   }
 
   unbind() {
@@ -239,6 +252,9 @@ export default class PointOpen extends Component {
     this._element.querySelector(`.point__destination-input`)
       .removeEventListener(`change`, this._onChangeDestination);
 
+    this._element.querySelector(`.point__favorite`)
+      .removeEventListener(`change`, this._onChangeFavorite);
+
     this._element.querySelector(`form`)
       .removeEventListener(`reset`, this._onDeleteButtonClick);
   }
@@ -247,10 +263,11 @@ export default class PointOpen extends Component {
     this._destination = data.destination;
     this._offers = data.offers;
     this._price = data.price;
-    this._type = data.type;// ? data.type : this._type;
+    this._type = data.type;
     this._time.end = data.time.end;
     this._time.start = data.time.start;
     this._duration = this._getDuration();
+    this._isFavorite = data.isFavorite;
   }
 
   blockSave() {
@@ -297,10 +314,10 @@ export default class PointOpen extends Component {
         target.destination.pictures = [...destinationsDict[value].pictures];
       },
       "date-start": (value) => {
-        target.time.start = value ? Date.parse(moment(value, `h:mm`).toDate()) : ``;
+        target.time.start = value ? Date.parse(moment(value, `YYYY-MM-DD HH:mm`).toDate()) : ``;
       },
       "date-end": (value) => {
-        target.time.end = value ? Date.parse(moment(value, `h:mm`).toDate()) : ``;
+        target.time.end = value ? Date.parse(moment(value, `YYYY-MM-DD HH:mm`).toDate()) : ``;
       },
       "price": (value) => {
         target.price = value;
@@ -309,6 +326,9 @@ export default class PointOpen extends Component {
         let arr = value.split(`:`);
         target.offers.push({title: arr[0], price: arr[1], accepted: true});
       },
+      "favorite": () => {
+        target.isFavorite = true;
+      }
     };
   }
 }

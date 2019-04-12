@@ -4,10 +4,9 @@ import {travelWay} from './common.js';
 
 export default class Point extends Component {
   _getDuration() {
-    const start = this._time.start;
-    const end = this._time.end;
-    return (Math.floor((end - start) / 3600000) + `H ` + Math.ceil(((end - start) % 3600000) / 60000) + `M`);
+    return (`${Math.floor((this._time.end - this._time.start) / 3600000)}H ${Math.ceil(((this._time.end - this._time.start) % 3600000) / 60000)}M`);
   }
+
   constructor(data) {
     super();
     this._id = data.id;
@@ -42,7 +41,7 @@ export default class Point extends Component {
   }
 
   renderTime(time) {
-    return moment(time).format(`h:mm`);
+    return moment(time).format(`HH:mm`);
   }
 
   get template() {

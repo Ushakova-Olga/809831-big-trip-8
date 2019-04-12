@@ -202,6 +202,16 @@ input[type=radio]:checked + .trip-filter__item--name {
 }
 
 .trip-sorting__item {
+  color: #b4b4b4;
+  font-family: var(--font);
+  font-size: var(--font-size-smaller);
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-left: -16px;
+  padding: 8px 16px;
+}
+
+.trip-sorting__item--name {
   border: solid 1px transparent;
   color: #b4b4b4;
   font-family: var(--font);
@@ -213,11 +223,11 @@ input[type=radio]:checked + .trip-filter__item--name {
   cursor: pointer;
 }
 
-.trip-sorting__item:hover {
+.trip-sorting__item--name:hover {
   opacity: 0.7;
 }
 
-input[type=radio]:checked + .trip-sorting__item {
+input[type=radio]:checked + .trip-sorting__item--name {
   border-color: #000;
   border-radius: 18px;
   box-sizing: border-box;
@@ -225,15 +235,15 @@ input[type=radio]:checked + .trip-sorting__item {
 }
 
 .trip-sorting__item--event {
-  margin-right: 180px;
+  margin-right: 160px;
 }
 
 .trip-sorting__item--time {
-  margin-right: 120px;
+  margin-right: 100px;
 }
 
 .trip-sorting__item--price {
-  margin-right: 48px;
+  margin-right: 28px;
 }
 
 .trip-sorting__item--offers {
@@ -397,8 +407,8 @@ input[type=radio]:checked + .trip-sorting__item {
   padding: 0 15px;
 }
 .point__date {
-  display: none;
-  font-size: 0;
+  /*display: none;*/
+  /*font-size: 0;*/
   width: 55px;
   margin-right: 5px;
 }
