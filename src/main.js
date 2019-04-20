@@ -8,22 +8,25 @@ import Provider from './provider.js';
 import Store from './store.js';
 import ModelPoint from './model-point.js';
 import TotalCost from './total-cost.js';
-import {travelWayFirst, travelWaySecond} from './common.js';
+import {travelWaysFirst, travelWaysSecond} from './common.js';
 
-const tripFilterForm = document.querySelector(`.trip-filter`);
-const tripDayElement = document.querySelector(`.trip-day__items`);
+const mainElement = document.querySelector(`main`);
+const tableLinkElement = document.querySelector(`.view-switch__item--table`);
+
 const statsElement = document.querySelector(`#stats`);
-
 const moneyCtx = document.querySelector(`.statistic__money`);
 const transportCtx = document.querySelector(`.statistic__transport`);
 const timeSpendCtx = document.querySelector(`.statistic__time-spend`);
 const containerStatistic = document.querySelector(`.statistic`);
+const statsLinkElement = document.querySelector(`.view-switch__item--stats`);
 
+const tripFilterForm = document.querySelector(`.trip-filter`);
+const tripDayElement = document.querySelector(`.trip-day__items`);
 const newEventButton = document.querySelector(`.trip-controls__new-event`);
 const totalCostElement = document.querySelector(`.trip__total`);
 const tripSortingForm = document.querySelector(`.trip-sorting`);
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA66`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA691`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 const ESC_KEYCODE = 27;
 
@@ -44,10 +47,11 @@ window.addEventListener(`online`, () => {
   provider.syncPoints();
 });
 
-export let destinationsData = [];
-export let destinationsDict = {};
-export let offersDict = {};
+export const destinationsData = [];
+export const destinationsDict = {};
+export const offersDict = {};
 let pointsArrayCurrent = [];
+
 const totalCostComponent = new TotalCost(0);
 
 const maxPoints = 10;
@@ -70,7 +74,6 @@ const filteredPoints = (filterName, points) => {
 };
 
 const sortingPoints = (sortingName, points) => {
-
   switch (sortingName) {
     case `Event`:
       return points.sort((a, b) => a.id - b.id);
@@ -95,19 +98,27 @@ const countCost = (points) => {
   return summ;
 };
 
+const countTime = (points) => {
+  let summ = 0;
+  points.forEach((it)=> {
+    summ += it.time.end - it.time.start;
+  });
+  return summ;
+};
+
 // Для статистики по деньгам
 const countMoneyCategory = (points) => {
   const types = [];
   const data = [];
   let dataObj = [];
-  travelWayFirst.forEach((it) => {
+  travelWaysFirst.forEach((it) => {
     const cost = countCost(points.filter((iit) => iit.type === it.name));
     if (cost > 0) {
       dataObj.push({type: `${it.icon} ${it.name}`, cost});
     }
   });
 
-  travelWaySecond.forEach((it) => {
+  travelWaysSecond.forEach((it) => {
     const cost = countCost(points.filter((iit) => iit.type === it.name));
     if (cost > 0) {
       dataObj.push({type: `${it.icon} ${it.name}`, cost});
@@ -127,7 +138,7 @@ const countTransportCategory = (points) => {
   const types = [];
   const data = [];
   let dataObj = [];
-  travelWayFirst.forEach((it) => {
+  travelWaysFirst.forEach((it) => {
     const transportPoints = points.filter((iit) => iit.type === it.name);
     const count = transportPoints.length;
     if (count > 0) {
@@ -149,23 +160,22 @@ const countTimespendPoints = (points) => {
   const types = [];
   const data = [];
   let dataObj = [];
-  let dest = {};
-  points.forEach((it)=> {
-    dest[it.destination.name] = 0;
-  });
-  points.forEach((it)=> {
-    dest[it.destination.name] += it.time.end - it.time.start;
-  });
-
-  for (let it in dest) {
-    if (dest[it]) {
-      dataObj.push({type: it, time: Math.floor(dest[it] / 3600000)});
+  travelWaysFirst.forEach((it) => {
+    const time = countTime(points.filter((iit) => iit.type === it.name));
+    if (time > 0) {
+      dataObj.push({type: `${it.icon} ${it.name}`, time});
     }
-  }
+  });
 
+  travelWaysSecond.forEach((it) => {
+    const time = countTime(points.filter((iit) => iit.type === it.name));
+    if (time > 0) {
+      dataObj.push({type: `${it.icon} ${it.name}`, time});
+    }
+  });
   dataObj = dataObj.sort((a, b) => b.time - a.time);
   dataObj.forEach((it) => {
-    data.push(it.time);
+    data.push(Math.floor(it.time / 3600000));
     types.push(it.type);
   });
 
@@ -182,7 +192,7 @@ const renderFilters = (data, sortData, points) => {
     tripFilterForm.appendChild(filterComponent.render());
     filterComponent.onFilter = () => {
       containerStatistic.classList.add(`visually-hidden`);
-      document.querySelector(`main`).classList.remove(`visually-hidden`);
+      mainElement.classList.remove(`visually-hidden`);
       renderSorting(sortData, filteredPoints(filterComponent._name, points));
     };
 
@@ -242,7 +252,14 @@ const renderPoints = (points) => {
       pointOpenComponent.onSubmit = (newObject) => {
         pointOpenComponent.blockSave();
         point.type = newObject.type;
-        point.offers = newObject.offers;
+
+        point.offers = new Set([...pointOpenComponent._offers].map((it) => {
+          if (([...newObject.offers].filter((obj) => ((obj.title === it.title) && (obj.price === it.price)))).length > 0) {
+            return {title: it.title, price: it.price, accepted: true};
+          } else {
+            return {title: it.title, price: it.price, accepted: false};
+          }
+        }));
 
         if (newObject.time.start !== ``) {
           point.time.start = newObject.time.start;
@@ -259,6 +276,7 @@ const renderPoints = (points) => {
         .then((response) => {
           if (response) {
             pointComponent.update(response);
+            pointOpenComponent.update(response);
             pointComponent.render();
             tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);
             pointOpenComponent.unrender();
@@ -327,8 +345,8 @@ const stopLoadPoints = () => {
 
 provider.getDestinations()
 .then((destinations) => {
-  destinationsData = destinations;
-  destinations.forEach((it) =>{
+  destinations.forEach((it) => {
+    destinationsData.push(it);
     destinationsDict[it.name] = it;
   });
 })
@@ -355,9 +373,9 @@ provider.getPoints()
 const onClickStatistic = function (evt) {
   evt.preventDefault();
   containerStatistic.classList.remove(`visually-hidden`);
-  document.querySelector(`main`).classList.add(`visually-hidden`);
-  document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
-  document.querySelector(`.view-switch__item--stats`).classList.add(`view-switch__item--active`);
+  mainElement.classList.add(`visually-hidden`);
+  tableLinkElement.classList.remove(`view-switch__item--active`);
+  statsLinkElement.classList.add(`view-switch__item--active`);
 
   tripFilterForm.classList.add(`visually-hidden`);
   createMoneyChart(moneyCtx, countMoneyCategory(pointsArrayCurrent).types, countMoneyCategory(pointsArrayCurrent).dataTypes);
@@ -371,9 +389,10 @@ const onClickTable = function (evt) {
   evt.preventDefault();
   containerStatistic.classList.add(`visually-hidden`);
   tripFilterForm.classList.remove(`visually-hidden`);
-  document.querySelector(`main`).classList.remove(`visually-hidden`);
-  document.querySelector(`.view-switch__item--active`).classList.remove(`view-switch__item--active`);
-  document.querySelector(`.view-switch__item--table`).classList.add(`view-switch__item--active`);
+
+  mainElement.classList.remove(`visually-hidden`);
+  tableLinkElement.classList.add(`view-switch__item--active`);
+  statsLinkElement.classList.remove(`view-switch__item--active`);
 };
 document.querySelector(`.view-switch__item`).addEventListener(`click`, onClickTable);
 
@@ -385,7 +404,7 @@ const onNewEventEscPress = (evt) => {
 };
 
 const onClickNewEventButton = function () {
-  let newPoint = new ModelPoint({
+  const newPoint = new ModelPoint({
     'id': -1,
     'type': ``,
     'date_from': Date.now(),
@@ -395,47 +414,60 @@ const onClickNewEventButton = function () {
     'destination': {name: ``, description: ``, pictures: []},
     'is_favorite': false,
   });
-  let pointOpen = new PointOpen(newPoint);
-  tripDayElement.innerHTML = ``;
-  tripDayElement.appendChild(pointOpen.render());
 
+  const pointOpen = new PointOpen(newPoint);
+  tripDayElement.insertBefore(pointOpen.render(), tripDayElement.firstElementChild);
+
+  /* Создание новой точки */
   document.addEventListener(`keydown`, onNewEventEscPress);
 
   pointOpen.onSubmit = (newObject) => {
-    pointOpen.blockSave();
-    newPoint.type = newObject.type;
-    newPoint.offers = newObject.offers;
+    if ((newObject.destination) && (newObject.type) && (newObject.price !== 0)) {
+      pointOpen.blockSave();
+      newPoint.type = newObject.type;
 
-    if (newObject.time.start !== ``) {
-      newPoint.time.start = newObject.time.start;
-    }
-    if (newObject.time.end !== ``) {
-      newPoint.time.end = newObject.time.end;
-    }
-    newPoint.price = newObject.price;
-    newPoint.destination = newObject.destination;
-    newPoint.isFavorite = newObject.isFavorite;
+      const offersNew = (offersDict[newObject.type]) ? offersDict[newObject.type] : [];
+      newPoint.offers = new Set([...offersNew].map((it) => {
+        if (([...newObject.offers].filter((obj) => ((obj.title === it.title) && (obj.price === it.price)))).length > 0) {
+          return {title: it.title, price: it.price, accepted: true};
+        } else {
+          return {title: it.title, price: it.price, accepted: false};
+        }
+      }));
 
-    let point = newPoint.toRAW();
-    document.removeEventListener(`keydown`, onNewEventEscPress);
-    provider.createPoint({point})
-    .then((response) => {
-      if (response) {
-        provider.getPoints()
-          .then((points) => {
-            pointsArrayCurrent = points;
-            renderFilters(filtersData, sortingData, points);
-          })
-          .then(stopLoadPoints)
-          .catch(errorLoadPoints);
+      if (newObject.time.start !== ``) {
+        newPoint.time.start = newObject.time.start;
       }
-    })
-    .catch(() => {
+      if (newObject.time.end !== ``) {
+        newPoint.time.end = newObject.time.end;
+      }
+      newPoint.price = newObject.price;
+      newPoint.destination = newObject.destination;
+      newPoint.isFavorite = newObject.isFavorite;
+
+      const point = newPoint.toRAW();
+      document.removeEventListener(`keydown`, onNewEventEscPress);
+      provider.createPoint({point})
+      .then((response) => {
+        if (response) {
+          provider.getPoints()
+            .then((points) => {
+              pointsArrayCurrent = points;
+              renderFilters(filtersData, sortingData, points);
+            })
+            .then(stopLoadPoints)
+            .catch(errorLoadPoints);
+        }
+      })
+      .catch(() => {
+        pointOpen.shake();
+      })
+      .then(() => {
+        pointOpen.unblockSave();
+      });
+    } else {
       pointOpen.shake();
-    })
-    .then(() => {
-      pointOpen.unblockSave();
-    });
+    }
   };
 
   pointOpen.onDelete = () => {

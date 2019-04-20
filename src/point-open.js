@@ -1,14 +1,10 @@
 import Component from './component.js';
 import moment from 'moment';
-import {travelWay, travelWayFirst, travelWaySecond} from './common.js';
+import {travelWay, travelWaysFirst, travelWaysSecond} from './common.js';
 import flatpickr from 'flatpickr';
 import {destinationsData, destinationsDict, offersDict} from './main.js';
 
 export default class PointOpen extends Component {
-  _getDuration() {
-    return (`${Math.floor((this._time.end - this._time.start) / 3600000)}H ${Math.ceil(((this._time.end - this._time.start) % 3600000) / 60000)}M`);
-  }
-
   constructor(data) {
     super();
     this._id = data.id;
@@ -29,6 +25,24 @@ export default class PointOpen extends Component {
 
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onDelete = null;
+  }
+
+  set onSubmit(fn) {
+    this._onSubmit = fn;
+  }
+
+  set onDelete(fn) {
+    this._onDelete = () => fn({id: this._id});
+  }
+
+  _getDuration() {
+    const days = Math.floor((this._time.end - this._time.start) / 86400000);
+    const hours = Math.floor(((this._time.end - this._time.start) % 86400000) / 3600000);
+    const minutes = Math.floor(((this._time.end - this._time.start) % 86400000) % 3600000 / 60000);
+    if (days > 0) {
+      return (`${days}D ${hours}H ${minutes}M`);
+    }
+    return (`${hours}H ${minutes}M`);
   }
 
   _processForm(formData) {
@@ -52,57 +66,8 @@ export default class PointOpen extends Component {
     return entry;
   }
 
-  _onSubmitButtonClick(evt) {
-    evt.preventDefault();
-    const formData = new FormData(this._element.querySelector(`form`));
-    const newData = this._processForm(formData);
-    if (typeof this._onSubmit === `function`) {
-      this._onSubmit(newData);
-    }
-    this.update(newData);
-  }
-
-  _onChangeTravelWay() {
-    let travelWayContainer = this._element.querySelector(`.travel-way__select`);
-    let checked = travelWayContainer.querySelector(`input:checked`);
-    this._type = travelWay[checked.value].name.toLocaleLowerCase();
-    this._offers = (offersDict[checked.value.toLocaleLowerCase().split(` -`).join(``)]) ? offersDict[checked.value.toLocaleLowerCase().split(` -`).join(``)] : this._offers;
-
-    this.unbind();
-    this._partialUpdate();
-    this.bind();
-  }
-
-  _onChangeDestination() {
-    let destinationInput = this._element.querySelector(`.point__destination-input`);
-    this._destination = destinationsDict[destinationInput.value];
-    this._destination.pictures = [...this._destination.pictures];
-    this.unbind();
-    this._partialUpdate();
-    this.bind();
-  }
-
-  _onChangeFavorite() {
-    this._isFavorite = !this._isFavorite;
-  }
-
   _partialUpdate() {
     this._element.innerHTML = this.innerTemplate();
-  }
-
-  _onDeleteButtonClick() {
-    if (typeof this._onDelete === `function`) {
-      this._onDelete();
-    }
-  }
-
-
-  set onSubmit(fn) {
-    this._onSubmit = fn;
-  }
-
-  set onDelete(fn) {
-    this._onDelete = () => fn({id: this._id});
   }
 
   renderOffers() {
@@ -144,7 +109,7 @@ export default class PointOpen extends Component {
   }
 
   renderFavorite() {
-    let checked = (this._isFavorite) ? `checked` : ``;
+    const checked = (this._isFavorite) ? `checked` : ``;
     return `
     <div class="paint__favorite-wrap">
       <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${checked}>
@@ -165,11 +130,11 @@ export default class PointOpen extends Component {
 
                     <div class="travel-way__select">
                       <div class="travel-way__select-group">
-                        ${this.renderTravelWaySelect(travelWayFirst)}
+                        ${this.renderTravelWaySelect(travelWaysFirst)}
                       </div>
 
                       <div class="travel-way__select-group">
-                        ${this.renderTravelWaySelect(travelWaySecond)}
+                        ${this.renderTravelWaySelect(travelWaysSecond)}
                       </div>
                     </div>
                   </div>
@@ -225,7 +190,7 @@ export default class PointOpen extends Component {
     this._element.querySelector(`form`)
       .addEventListener(`submit`, this._onSubmitButtonClick);
 
-    this._element.querySelector(`.travel-way__select-group`)
+    this._element.querySelector(`.travel-way__select`)
       .addEventListener(`change`, this._onChangeTravelWay);
 
     this._element.querySelector(`.point__destination-input`)
@@ -246,7 +211,7 @@ export default class PointOpen extends Component {
     this._element.querySelector(`form`)
       .removeEventListener(`submit`, this._onSubmitButtonClick);
 
-    this._element.querySelector(`.travel-way__select-group`)
+    this._element.querySelector(`.travel-way__select`)
     .removeEventListener(`change`, this._onChangeTravelWay);
 
     this._element.querySelector(`.point__destination-input`)
@@ -302,16 +267,57 @@ export default class PointOpen extends Component {
     }, ANIMATION_TIMEOUT);
   }
 
-  static createMapper(target) {
+  // Обработчики событий
+  _onSubmitButtonClick(evt) {
+    evt.preventDefault();
+    const formData = new FormData(this._element.querySelector(`form`));
+    const newData = this._processForm(formData);
+    if (typeof this._onSubmit === `function`) {
+      this._onSubmit(newData);
+    }
+    this.update(newData);
+  }
 
+  _onChangeTravelWay() {
+    const travelWayContainer = this._element.querySelector(`.travel-way__select`);
+    const checked = travelWayContainer.querySelector(`input:checked`);
+    this._type = travelWay[checked.value].name.toLocaleLowerCase();
+    this._offers = (offersDict[checked.value.toLocaleLowerCase().split(` -`).join(``)]) ? offersDict[checked.value.toLocaleLowerCase().split(` -`).join(``)] : [];
+    this.unbind();
+    this._partialUpdate();
+    this.bind();
+  }
+
+  _onChangeDestination() {
+    const destinationInput = this._element.querySelector(`.point__destination-input`);
+    this._destination = destinationsDict[destinationInput.value];
+    this._destination.pictures = [...this._destination.pictures];
+    this.unbind();
+    this._partialUpdate();
+    this.bind();
+  }
+
+  _onChangeFavorite() {
+    this._isFavorite = !this._isFavorite;
+  }
+
+  _onDeleteButtonClick() {
+    if (typeof this._onDelete === `function`) {
+      this._onDelete();
+    }
+  }
+
+  static createMapper(target) {
     return {
       "travel-way": (value) => {
         target.type = travelWay[value].name.toLocaleLowerCase();
       },
       "destination": (value) => {
-        target.destination.name = value;
-        target.destination.description = destinationsDict[value].description;
-        target.destination.pictures = [...destinationsDict[value].pictures];
+        if (value !== ``) {
+          target.destination.name = value;
+          target.destination.description = destinationsDict[value].description;
+          target.destination.pictures = [...destinationsDict[value].pictures];
+        }
       },
       "date-start": (value) => {
         target.time.start = value ? Date.parse(moment(value, `YYYY-MM-DD HH:mm`).toDate()) : ``;
@@ -323,7 +329,7 @@ export default class PointOpen extends Component {
         target.price = value;
       },
       "offer": (value) => {
-        let arr = value.split(`:`);
+        const arr = value.split(`:`);
         target.offers.push({title: arr[0], price: arr[1], accepted: true});
       },
       "favorite": () => {

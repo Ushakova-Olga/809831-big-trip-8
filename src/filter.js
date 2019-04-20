@@ -16,14 +16,6 @@ export default class Filter extends Component {
     this._onFilter = fn;
   }
 
-  _onFilter(evt) {
-    evt.preventDefault();
-
-    if (typeof this._onFilter === `function`) {
-      this._onFilter();
-    }
-  }
-
   get template() {
     const checked = this._checked ? `checked` : ``;
     return `
@@ -45,5 +37,13 @@ export default class Filter extends Component {
 
   unbind() {
     this._element.removeEventListener(`change`, this._onFilter);
+  }
+
+  _onFilter(evt) {
+    evt.preventDefault();
+
+    if (typeof this._onFilter === `function`) {
+      this._onFilter();
+    }
   }
 }

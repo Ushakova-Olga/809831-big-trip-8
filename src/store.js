@@ -5,11 +5,11 @@ export default class Store {
   }
 
   setItem({key, item, storeKey}) {
+    // items меняет значение в условии, const не работает
     let items = {};
     if (this.getAll({storeKey: [storeKey]}) !== null) {
       items = this.getAll({storeKey: [storeKey]});
     }
-
     items[key] = item;
     this._storage.setItem(this._storeKey[storeKey], JSON.stringify(items));
   }

@@ -21,12 +21,11 @@ export default class Provider {
           this._store.setItem({key: point.id, item: point.toRAW(), storeKey: `points`});
           return point;
         });
-    } else {
-      const point = data;
-      this._needSync = true;
-      this._store.setItem({key: point.id, item: point, storeKey: `points`});
-      return Promise.resolve(ModelPoint.parsePoint(point));
     }
+    const point = data;
+    this._needSync = true;
+    this._store.setItem({key: point.id, item: point, storeKey: `points`});
+    return Promise.resolve(ModelPoint.parsePoint(point));
   }
 
   createPoint({point}) {
@@ -36,13 +35,12 @@ export default class Provider {
           this._store.setItem({key: pointCreated.id, item: pointCreated.toRAW(), storeKey: `points`});
           return pointCreated;
         });
-    } else {
-      point.id = this._generateId();
-      this._needSync = true;
-
-      this._store.setItem({key: point.id, item: point, storeKey: `points`});
-      return Promise.resolve(ModelPoint.parsePoint(point));
     }
+    point.id = this._generateId();
+    this._needSync = true;
+
+    this._store.setItem({key: point.id, item: point, storeKey: `points`});
+    return Promise.resolve(ModelPoint.parsePoint(point));
   }
 
   deletePoint({id}) {
@@ -51,18 +49,17 @@ export default class Provider {
         .then(() => {
           this._store.removeItem({key: id, storeKey: `points`});
         });
-    } else {
-      this._needSync = true;
-      this._store.removeItem({key: id, storeKey: `points`});
-      return Promise.resolve(true);
     }
+    this._needSync = true;
+    this._store.removeItem({key: id, storeKey: `points`});
+    return Promise.resolve(true);
   }
 
   getPoints() {
     if (this._isOnline()) {
       return this._api.getPoints()
         .then((points) => {
-          let pointsNew = {};
+          const pointsNew = {};
           points.forEach((it) => {
             if (it.id) {
               pointsNew[it.id] = it;
@@ -71,20 +68,19 @@ export default class Provider {
           this._store.setItems({items: pointsNew, storeKey: `points`});
           return ModelPoint.parsePoints(points);
         });
-    } else {
-      const rawPointsMap = this._store.getAll({storeKey: `points`});
-      const rawPoints = objectToArray(rawPointsMap);
-      const points = ModelPoint.parsePoints(rawPoints);
-
-      return Promise.resolve(points);
     }
+    const rawPointsMap = this._store.getAll({storeKey: `points`});
+    const rawPoints = objectToArray(rawPointsMap);
+    const points = ModelPoint.parsePoints(rawPoints);
+
+    return Promise.resolve(points);
   }
 
   getDestinations() {
     if (this._isOnline()) {
       return this._api.getDestinations()
         .then((destinations) => {
-          let destinationsNew = {};
+          const destinationsNew = {};
 
           destinations.forEach((it)=> {
             if (it.name) {
@@ -95,20 +91,19 @@ export default class Provider {
           this._store.setItems({items: destinationsNew, storeKey: `destinations`});
           return ModelDestination.parseDestinations(destinations);
         });
-    } else {
-      const rawDestinationsMap = this._store.getAll({storeKey: `destinations`});
-      const rawDestinations = objectToArray(rawDestinationsMap);
-      const destinations = ModelDestination.parseDestinations(rawDestinations);
-
-      return Promise.resolve(destinations);
     }
+    const rawDestinationsMap = this._store.getAll({storeKey: `destinations`});
+    const rawDestinations = objectToArray(rawDestinationsMap);
+    const destinations = ModelDestination.parseDestinations(rawDestinations);
+
+    return Promise.resolve(destinations);
   }
 
   getOffers() {
     if (this._isOnline()) {
       return this._api.getOffers()
         .then((offers) => {
-          let offersNew = {};
+          const offersNew = {};
 
           offers.forEach((it)=> {
             if (it.type) {
@@ -119,13 +114,12 @@ export default class Provider {
           this._store.setItems({items: offersNew, storeKey: `offers`});
           return ModelOffer.parseOffers(offers);
         });
-    } else {
-      const rawOffersMap = this._store.getAll({storeKey: `offers`});
-      const rawOffers = objectToArray(rawOffersMap);
-      const offers = ModelOffer.parseOffers(rawOffers);
-
-      return Promise.resolve(offers);
     }
+    const rawOffersMap = this._store.getAll({storeKey: `offers`});
+    const rawOffers = objectToArray(rawOffersMap);
+    const offers = ModelOffer.parseOffers(rawOffers);
+
+    return Promise.resolve(offers);
   }
 
   syncPoints() {

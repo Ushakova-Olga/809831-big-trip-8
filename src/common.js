@@ -17,7 +17,7 @@ export const travelWay = {
   'restaurant': {name: `Restaurant`, icon: `🍴`},
 };
 
-export const travelWayFirst = [
+export const travelWaysFirst = [
   {name: `taxi`, icon: `🚕`},
   {name: `bus`, icon: `🚌`},
   {name: `train`, icon: `🚂`},
@@ -27,7 +27,7 @@ export const travelWayFirst = [
   {name: `flight`, icon: `✈️`},
 ];
 
-export const travelWaySecond = [
+export const travelWaysSecond = [
   {name: `check-in`, icon: `🏨`},
   {name: `sightseeing`, icon: `🏛`},
   {name: `restaurant`, icon: `🍴`},
