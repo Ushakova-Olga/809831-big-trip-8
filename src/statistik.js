@@ -5,7 +5,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 const BAR_HEIGHT = 55;
 
 export function createMoneyChart(moneyCtx, types, dataTypes) {
-  moneyCtx.height = BAR_HEIGHT * 6;
+  moneyCtx.height = BAR_HEIGHT * types.length;
   return new Chart(moneyCtx, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
@@ -73,7 +73,7 @@ export function createMoneyChart(moneyCtx, types, dataTypes) {
 }
 
 export function createTransportChart(transportCtx, types, dataTypes) {
-  transportCtx.height = BAR_HEIGHT * 4;
+  transportCtx.height = BAR_HEIGHT * types.length;
   return new Chart(transportCtx, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
@@ -143,7 +143,7 @@ export function createTransportChart(transportCtx, types, dataTypes) {
 export function createTimeSpendChart(timeSpendCtx, types, dataTypes) {
 
   // Рассчитаем высоту канваса в зависимости от того, сколько данных в него будет передаваться
-  timeSpendCtx.height = BAR_HEIGHT * 4;
+  timeSpendCtx.height = BAR_HEIGHT * types.length;
   return new Chart(timeSpendCtx, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,

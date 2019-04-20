@@ -3,10 +3,6 @@ import moment from 'moment';
 import {travelWay} from './common.js';
 
 export default class Point extends Component {
-  _getDuration() {
-    return (`${Math.floor((this._time.end - this._time.start) / 3600000)}H ${Math.ceil(((this._time.end - this._time.start) % 3600000) / 60000)}M`);
-  }
-
   constructor(data) {
     super();
     this._id = data.id;
@@ -20,28 +16,11 @@ export default class Point extends Component {
 
     this._onOpen = null;
     this._onOpenButtonClick = this._onOpenButtonClick.bind(this);
-  }
-
-  _onOpenButtonClick() {
-    if (typeof this._onOpen === `function`) {
-      this._onOpen();
-    }
+    this._countOffers = 3;
   }
 
   set onOpen(fn) {
     this._onOpen = fn;
-  }
-
-  renderOffers() {
-    return [...this._offers].map((it) => `
-    <li>
-      <button class="trip-point__offer">${it.title}+&euro;&nbsp;${it.price}</button>
-    </li>
-    `).join(``);
-  }
-
-  renderTime(time) {
-    return moment(time).format(`HH:mm`);
   }
 
   get template() {
@@ -57,6 +36,32 @@ export default class Point extends Component {
             ${this.renderOffers()}
           </ul>
         </article>`;
+  }
+
+  _getDuration() {
+    const days = Math.floor((this._time.end - this._time.start) / 86400000);
+    const hours = Math.floor(((this._time.end - this._time.start) % 86400000) / 3600000);
+    const minutes = Math.floor(((this._time.end - this._time.start) % 86400000) % 3600000 / 60000);
+    if (days > 0) {
+      return (`${days}D ${hours}H ${minutes}M`);
+    }
+    return (`${hours}H ${minutes}M`);
+  }
+
+  renderOffers() {
+    return [...this._offers].map((it, index) => {
+      if (index < this._countOffers) {
+        return `<li>
+          <button class="trip-point__offer">${it.title}+&euro;&nbsp;${it.price}</button>
+        </li>
+        `;
+      }
+      return ``;
+    }).join(``);
+  }
+
+  renderTime(time) {
+    return moment(time).format(`HH:mm`);
   }
 
   bind() {
@@ -82,5 +87,11 @@ export default class Point extends Component {
 
     this._price = data.price;
     this._duration = this._getDuration();
+  }
+
+  _onOpenButtonClick() {
+    if (typeof this._onOpen === `function`) {
+      this._onOpen();
+    }
   }
 }

@@ -15,14 +15,6 @@ export default class Sorting extends Component {
     this._onSorting = fn;
   }
 
-  _onSorting(evt) {
-    evt.preventDefault();
-
-    if (typeof this._onSorting === `function`) {
-      this._onSorting();
-    }
-  }
-
   get template() {
     const checked = this._checked ? `checked` : ``;
 
@@ -33,10 +25,10 @@ export default class Sorting extends Component {
         <span class="trip-sorting__item--name">${this._name}</span>
       </label>
       `;
-    } else {
-      return `
-      <span class="trip-sorting__item trip-sorting__item--${this._id}">${this._name}</span>`;
     }
+
+    return `
+    <span class="trip-sorting__item trip-sorting__item--${this._id}">${this._name}</span>`;
   }
 
   render() {
@@ -54,6 +46,14 @@ export default class Sorting extends Component {
   unbind() {
     if (this._active) {
       this._element.querySelector(`input`).removeEventListener(`change`, this._onSorting);
+    }
+  }
+
+  _onSorting(evt) {
+    evt.preventDefault();
+
+    if (typeof this._onSorting === `function`) {
+      this._onSorting();
     }
   }
 }
