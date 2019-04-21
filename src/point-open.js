@@ -42,7 +42,10 @@ export default class PointOpen extends Component {
     if (days > 0) {
       return (`${days}D ${hours}H ${minutes}M`);
     }
-    return (`${hours}H ${minutes}M`);
+    if (hours > 0) {
+      return (`${hours}H ${minutes}M`);
+    }
+    return (`${minutes}M`);
   }
 
   _processForm(formData) {

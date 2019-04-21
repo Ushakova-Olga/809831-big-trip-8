@@ -45,7 +45,10 @@ export default class Point extends Component {
     if (days > 0) {
       return (`${days}D ${hours}H ${minutes}M`);
     }
-    return (`${hours}H ${minutes}M`);
+    if (hours > 0) {
+      return (`${hours}H ${minutes}M`);
+    }
+    return (`${minutes}M`);
   }
 
   renderOffers() {
