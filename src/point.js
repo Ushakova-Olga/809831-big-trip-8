@@ -52,8 +52,10 @@ export default class Point extends Component {
   }
 
   renderOffers() {
-    return [...this._offers].map((it, index) => {
-      if (index < this._countOffers) {
+    let i = 0;
+    return [...this._offers].map((it) => {
+      if ((i < this._countOffers) && (it.accepted)) {
+        i++;
         return `<li>
           <button class="trip-point__offer">${it.title}+&euro;&nbsp;${it.price}</button>
         </li>
