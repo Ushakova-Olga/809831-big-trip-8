@@ -2,6 +2,7 @@ import Point from './point.js';
 import PointOpen from './point-open.js';
 import Filter from './filter.js';
 import Sorting from './sorting.js';
+import Day from './day.js';
 import {createMoneyChart, createTransportChart, createTimeSpendChart} from './statistik.js';
 import API from './api.js';
 import Provider from './provider.js';
@@ -9,6 +10,7 @@ import Store from './store.js';
 import ModelPoint from './model-point.js';
 import TotalCost from './total-cost.js';
 import {travelWaysFirst, travelWaysSecond} from './common.js';
+import moment from 'moment';
 
 const mainElement = document.querySelector(`main`);
 const tableLinkElement = document.querySelector(`.view-switch__item--table`);
@@ -22,11 +24,13 @@ const statsLinkElement = document.querySelector(`.view-switch__item--stats`);
 
 const tripFilterForm = document.querySelector(`.trip-filter`);
 const tripDayElement = document.querySelector(`.trip-day__items`);
+const tripPointsElement = document.querySelector(`.trip-points`);
+
 const newEventButton = document.querySelector(`.trip-controls__new-event`);
 const totalCostElement = document.querySelector(`.trip__total`);
 const tripSortingForm = document.querySelector(`.trip-sorting`);
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA691`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZA692`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip/`;
 const ESC_KEYCODE = 27;
 
@@ -51,6 +55,7 @@ export const destinationsData = [];
 export const destinationsDict = {};
 export const offersDict = {};
 let pointsArrayCurrent = [];
+let days = [];
 
 const totalCostComponent = new TotalCost(0);
 
@@ -91,8 +96,10 @@ const countCost = (points) => {
   let summ = 0;
   points.forEach((it)=>{
     summ += Number.parseInt(it.price, 10);
-    [...it.offers].forEach((iit)=>{
-      summ += Number.parseInt(iit.price, 10);
+    [...it.offers].forEach((iit)=> {
+      if (iit.accepted) {
+        summ += Number.parseInt(iit.price, 10);
+      }
     });
   });
   return summ;
@@ -223,20 +230,44 @@ const renderSorting = (data, points) => {
   });
 };
 
-const renderPoints = (points) => {
-  tripDayElement.innerHTML = ``;
+const getDatesDays = (points) => {
+  const dates = points.map((it) => Date.parse(moment(moment(it.time.start).format(`YYYY-MM-DD`), `YYYY-MM-DD`).toDate()));
+  const datesUnique = new Set([...dates]);
+  const datesSorting = [...datesUnique].sort((a, b) => a - b);
+  return datesSorting;
+};
 
+const renderDays = (points) => {
+  days = [];
+  tripPointsElement.innerHTML = ``;
+  const datesSorting = getDatesDays(points);
+  datesSorting.forEach((it, i) => {
+    const newDay = new Day({data: it, number: i + 1});
+    tripPointsElement.appendChild(newDay.render());
+    days.push(newDay);
+  });
+};
+
+const renderPoints = (points) => {
+  renderDays(points);
   points.forEach((point) => {
+
     if (point !== {}) {
       const pointComponent = new Point(point);
       const pointOpenComponent = new PointOpen(point, destinationsData, destinationsDict);
 
-      tripDayElement.appendChild(pointComponent.render());
+      let tripCurrentDay = null;
+      days.forEach((it) => {
+        if (it._data === Date.parse(moment(moment(point.time.start).format(`YYYY-MM-DD`), `YYYY-MM-DD`).toDate())) {
+          tripCurrentDay = it;
+        }
+      });
+      tripCurrentDay.insertPoint(pointComponent.render());
 
       const onPointOpenEscPress = (evt) => {
         if (evt.keyCode === ESC_KEYCODE) {
           pointComponent.render();
-          tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);
+          tripCurrentDay.replacePoints(pointComponent.element, pointOpenComponent.element);
           pointOpenComponent.unrender();
           document.removeEventListener(`keydown`, onPointOpenEscPress);
         }
@@ -244,7 +275,7 @@ const renderPoints = (points) => {
 
       pointComponent.onOpen = () => {
         pointOpenComponent.render();
-        tripDayElement.replaceChild(pointOpenComponent.element, pointComponent.element);
+        tripCurrentDay.replacePoints(pointOpenComponent.element, pointComponent.element);
         pointComponent.unrender();
         document.addEventListener(`keydown`, onPointOpenEscPress);
       };
@@ -275,12 +306,7 @@ const renderPoints = (points) => {
         provider.updatePoint({id: point.id, data: point.toRAW()})
         .then((response) => {
           if (response) {
-            pointComponent.update(response);
-            pointOpenComponent.update(response);
-            pointComponent.render();
-            tripDayElement.replaceChild(pointComponent.element, pointOpenComponent.element);
-            pointOpenComponent.unrender();
-
+            renderPoints(points);
             totalCostComponent.setCost = countCost(pointsArrayCurrent);
             totalCostComponent.unrender();
             totalCostElement.appendChild(totalCostComponent.render());
@@ -357,7 +383,7 @@ provider.getOffers()
   offers.forEach((it) =>{
     offersDict[it.type] = it.offers.map((iit) => ({title: iit.name, price: iit.price, accepted: false}));
   });
-});
+}).catch();
 
 startLoadPoints();
 
@@ -368,7 +394,6 @@ provider.getPoints()
   })
   .then(stopLoadPoints)
   .catch(errorLoadPoints);
-
 
 const onClickStatistic = function (evt) {
   evt.preventDefault();
@@ -404,75 +429,79 @@ const onNewEventEscPress = (evt) => {
 };
 
 const onClickNewEventButton = function () {
-  const newPoint = new ModelPoint({
-    'id': -1,
-    'type': ``,
-    'date_from': Date.now(),
-    'date_to': Date.now() + 3600000,
-    'offers': [],
-    'base_price': 0,
-    'destination': {name: ``, description: ``, pictures: []},
-    'is_favorite': false,
-  });
+  if ((destinationsDict !== {}) && (offersDict !== {}) && (pointsArrayCurrent.length > 0)) {
+    const newPoint = new ModelPoint({
+      'id': -1,
+      'type': ``,
+      'date_from': Date.now(),
+      'date_to': Date.now() + 3600000,
+      'offers': [],
+      'base_price': 0,
+      'destination': {name: ``, description: ``, pictures: []},
+      'is_favorite': false,
+    });
 
-  const pointOpen = new PointOpen(newPoint);
-  tripDayElement.insertBefore(pointOpen.render(), tripDayElement.firstElementChild);
+    const pointOpen = new PointOpen(newPoint);
+    const tripFirstDay = days[0];
+    tripFirstDay.insertFirst(pointOpen.render());
 
-  /* Создание новой точки */
-  document.addEventListener(`keydown`, onNewEventEscPress);
+    /* Создание новой точки */
+    document.addEventListener(`keydown`, onNewEventEscPress);
 
-  pointOpen.onSubmit = (newObject) => {
-    if ((newObject.destination) && (newObject.type) && (newObject.price !== 0)) {
-      pointOpen.blockSave();
-      newPoint.type = newObject.type;
+    pointOpen.onSubmit = (newObject) => {
+      if ((newObject.destination) && (newObject.type) && (newObject.price !== 0)) {
+        pointOpen.blockSave();
+        newPoint.type = newObject.type;
 
-      const offersNew = (offersDict[newObject.type]) ? offersDict[newObject.type] : [];
-      newPoint.offers = new Set([...offersNew].map((it) => {
-        if (([...newObject.offers].filter((obj) => ((obj.title === it.title) && (obj.price === it.price)))).length > 0) {
-          return {title: it.title, price: it.price, accepted: true};
-        } else {
-          return {title: it.title, price: it.price, accepted: false};
+        const offersNew = (offersDict[newObject.type]) ? offersDict[newObject.type] : [];
+        newPoint.offers = new Set([...offersNew].map((it) => {
+          if (([...newObject.offers].filter((obj) => ((obj.title === it.title) && (obj.price === it.price)))).length > 0) {
+            return {title: it.title, price: it.price, accepted: true};
+          } else {
+            return {title: it.title, price: it.price, accepted: false};
+          }
+        }));
+
+        if (newObject.time.start !== ``) {
+          newPoint.time.start = newObject.time.start;
         }
-      }));
-
-      if (newObject.time.start !== ``) {
-        newPoint.time.start = newObject.time.start;
-      }
-      if (newObject.time.end !== ``) {
-        newPoint.time.end = newObject.time.end;
-      }
-      newPoint.price = newObject.price;
-      newPoint.destination = newObject.destination;
-      newPoint.isFavorite = newObject.isFavorite;
-
-      const point = newPoint.toRAW();
-      document.removeEventListener(`keydown`, onNewEventEscPress);
-      provider.createPoint({point})
-      .then((response) => {
-        if (response) {
-          provider.getPoints()
-            .then((points) => {
-              pointsArrayCurrent = points;
-              renderFilters(filtersData, sortingData, points);
-            })
-            .then(stopLoadPoints)
-            .catch(errorLoadPoints);
+        if (newObject.time.end !== ``) {
+          newPoint.time.end = newObject.time.end;
         }
-      })
-      .catch(() => {
+        newPoint.price = newObject.price;
+        newPoint.destination = newObject.destination;
+        newPoint.isFavorite = newObject.isFavorite;
+
+        const point = newPoint.toRAW();
+        document.removeEventListener(`keydown`, onNewEventEscPress);
+        provider.createPoint({point})
+        .then((response) => {
+          if (response) {
+            tripFirstDay.removeElement(pointOpen.element);
+            provider.getPoints()
+              .then((points) => {
+                pointsArrayCurrent = points;
+                renderFilters(filtersData, sortingData, points);
+              })
+              .then(stopLoadPoints)
+              .catch(errorLoadPoints);
+          }
+        })
+        .catch(() => {
+          pointOpen.shake();
+        })
+        .then(() => {
+          pointOpen.unblockSave();
+        });
+      } else {
         pointOpen.shake();
-      })
-      .then(() => {
-        pointOpen.unblockSave();
-      });
-    } else {
-      pointOpen.shake();
-    }
-  };
+      }
+    };
 
-  pointOpen.onDelete = () => {
-    renderFilters(filtersData, sortingData, pointsArrayCurrent);
-    document.removeEventListener(`keydown`, onNewEventEscPress);
-  };
+    pointOpen.onDelete = () => {
+      renderFilters(filtersData, sortingData, pointsArrayCurrent);
+      document.removeEventListener(`keydown`, onNewEventEscPress);
+    };
+  }
 };
 newEventButton.addEventListener(`click`, onClickNewEventButton);

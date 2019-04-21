@@ -122,7 +122,7 @@ export default class PointOpen extends Component {
                 <header class="point__header">
                   <label class="point__date">
                     choose day
-                    <input class="point__input" type="text" placeholder="18 Mar" name="day">
+                    <input class="point__input" type="text" placeholder="${moment(this._time.start).format(`MMM D`)}" name="day">
                   </label>
                     <div class="travel-way">
                     <label class="travel-way__label" for="travel-way__toggle">${this._type ? travelWay[this._type].icon : ``}</label>
@@ -326,11 +326,11 @@ export default class PointOpen extends Component {
         target.time.end = value ? Date.parse(moment(value, `YYYY-MM-DD HH:mm`).toDate()) : ``;
       },
       "price": (value) => {
-        target.price = value;
+        target.price = parseInt(value, 10);
       },
       "offer": (value) => {
         const arr = value.split(`:`);
-        target.offers.push({title: arr[0], price: arr[1], accepted: true});
+        target.offers.push({title: arr[0], price: parseInt(arr[1], 10), accepted: true});
       },
       "favorite": () => {
         target.isFavorite = true;
